@@ -1,0 +1,65 @@
+apply plugin: 'com.android.application'
+//apply plugin: 'com.jakewharton.butterknife'
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def pkiMode = "true"
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+android {
+//    signingConfigs {
+//        config {
+//            keyAlias keystoreProperties['unittestAlias']
+//            keyPassword keystoreProperties['unittestPassword']
+//            storeFile file(keystoreProperties['storeFile'])
+//            storePassword keystoreProperties['storePassword']
+//        }
+//    }
+
+    compileSdkVersion 23
+
+    defaultConfig {
+        applicationId "com.example.calendar"
+        minSdkVersion 23
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:24.1.1'
+    implementation 'com.android.support:recyclerview-v7:24.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.code.gson:gson:2.7'
+    testImplementation 'junit:junit:4.12'
+
+//    implementation 'com.jakewharton:butterknife:10.1.0'
+//    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+
+    testImplementation "org.robolectric:robolectric:3.4.2"
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:0.5'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-intents:2.2.2'
+    configurations.all {
+        resolutionStrategy.force 'com.android.support:support-annotations:25.3.1'
+    }
+}

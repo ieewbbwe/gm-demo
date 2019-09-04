@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">calendar</string>
+
+    <string-array name="choses">
+        <item>calendar</item>
+        <item>events</item>
+        <item>reminder</item>
+        <item>instances</item>
+    </string-array>
+</resources>

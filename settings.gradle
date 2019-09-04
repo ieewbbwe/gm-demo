@@ -1,0 +1,2 @@
+//include ':app', ':calendar', ':unittest'
+include  ':calendar', ':testUtils', ':aop'

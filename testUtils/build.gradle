@@ -1,0 +1,87 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+
+
+
+    defaultConfig {
+        applicationId "com.example.espresso"
+        minSdkVersion 23
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk{
+            abiFilters "armeabi-v7a"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+
+
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+
+    sourceSets{
+        main{
+            jni.srcDirs=[]
+            jniLibs.srcDirs = ['src/main/libs']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:24.1.1'
+    implementation 'com.android.support:recyclerview-v7:24.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.google.code.gson:gson:2.7'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.2'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    testImplementation 'junit:junit:4.12'
+
+    /*Unit Test*/
+    //也可以使用config.gradle中的supportAnnotations，但是要把版本号改一致
+    compile 'com.android.support:support-annotations:25.3.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.19.0'
+    testImplementation "org.robolectric:robolectric:3.4.2"
+    androidTestImplementation 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:0.5'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    // 这是为了解决编译包不匹配的问题，强制规定使用25.3.1
+    configurations.all {
+        resolutionStrategy.force 'com.android.support:support-annotations:25.3.1'
+    }
+
+//    configurations {
+//        all {
+//            resolutionStrategy {
+//                eachDependency { DependencyResolveDetails details ->
+//                    if (details.requested.group == 'com.android.support' &&
+//                            details.requested.name == 'support-annotations') {
+//                        details.useVersion('25.3.1')
+//                        details.because ''
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+}
