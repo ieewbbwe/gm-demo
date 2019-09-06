@@ -1,6 +1,7 @@
 package com.sgm.rwutils
 
 import android.os.Environment
+import android.util.Log
 import java.io.*
 
 
@@ -37,6 +38,7 @@ class MainPresenter(private val mView: MainContract.View<MainContract.Presenter>
             accFile.write(barr)
             accFile.close()
             mView.showMsg("写入：$str\n字符大小：${barr.size} B")
+            Log.d("picher", "字符大小：${barr.size} B")
         } catch (e: IOException) {
             e.printStackTrace()
         }

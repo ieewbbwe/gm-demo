@@ -41,13 +41,13 @@ class MainActivity : AppCompatActivity(), MainContract.View<MainContract.Present
         mContentTv = findViewById(R.id.m_content_et)
         mPresenter = MainPresenter(this)
 
-        mWriteBt.setOnClickListener({
+        mWriteBt.setOnClickListener {
             mPresenter.writeToFile(mWriteContentEt.text!!.toString(), mPresenter.getTargetFile())
-        })
+        }
 
-        mReadBt.setOnClickListener({
+        mReadBt.setOnClickListener {
             mPresenter.readFromFile(mPresenter.getTargetFile())
-        })
+        }
 
         reqPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
