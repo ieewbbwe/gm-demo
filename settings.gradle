@@ -1,2 +1,2 @@
 //include ':app', ':calendar', ':unittest'
-include  ':calendar', ':testUtils', ':aop', ':rwutils'
+include  ':calendar', ':testUtils', ':aop', ':rwutils', ':iorecord'
