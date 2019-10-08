@@ -1,44 +1,63 @@
 package com.sgm.iorecord
 
-import android.app.IProcessObserver
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Environment
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.sgm.iorecord.adapter.IOListAdapter
+import com.sgm.iorecord.bean.IOBean
 import com.sgm.iorecord.databases.DataEngine
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
+import java.io.File
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListener {
 
     var mPresenter: MainPresenter? = null
+    var mAdapter: IOListAdapter? = IOListAdapter()
+    var mList: MutableList<IOBean>? = mutableListOf()
+    private val BACK_UP_FILE = (Environment.getExternalStorageDirectory().path + File.separator + "iorecord")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         mPresenter = MainPresenter(this)
 
-        m_register_bt.setOnClickListener({
-            registerService()
-        })
-
+        m_register_bt.setOnClickListener(this)
         m_insert_bt.setOnClickListener(this)
         m_query_bt.setOnClickListener(this)
         m_delete_bt.setOnClickListener(this)
         m_update_bt.setOnClickListener(this)
 
-
+        mAdapter!!.setData(mList)
+        m_record_rlv.apply {
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            adapter = mAdapter
+        }
+        reqPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
     override fun onClick(v: View?) {
         when (v?.id) {
+            R.id.m_register_bt -> mPresenter?.registerService()
             R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOBean())
-            R.id.m_delete_bt -> showToast("doing")
+            R.id.m_delete_bt -> showToast(mPresenter?.executeShell("ls"))
             R.id.m_update_bt -> showToast("doing")
             R.id.m_query_bt -> {
-                mPresenter?.queryAll()
-
+                mList!!.clear()
+                mList!!.addAll(mPresenter?.queryAll()!!)
+                showToast("Query succeed size:" + mList!!.size)
+                mAdapter!!.setData(mList)
+                mAdapter!!.notifyDataSetChanged()
             }
         }
     }
@@ -47,33 +66,46 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
     }
 
+    private val REQUEST_CODE_ASK_STORAGE = 1
 
-    private val mProcessObserver = object : IProcessObserver.Stub() {
-        override fun onProcessDied(pid: Int, uid: Int) {
-            Log.d("picher", String.format("onProcessDied ->> pid:%s，uid：%s", pid, uid))
-        }
-
-        override fun onForegroundActivitiesChanged(pid: Int, uid: Int, foregroundActivities: Boolean) {
-            Log.d("picher", String.format("onForegroundActivitiesChanged ->> pid:%s，uid：%s，foregroundActivities：%s",
-                    pid, uid, foregroundActivities))
+    private fun reqPermission(vararg pms: String) {
+        for (premission in pms) {
+            if (ContextCompat.checkSelfPermission(applicationContext, premission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, premission)) {
+                    AlertDialog.Builder(this)
+                            .setTitle("提示")
+                            .setMessage("需要开启存储的权限，是否继续？")
+                            .setPositiveButton("确定") { _, _ ->
+                                ActivityCompat.requestPermissions(this@MainActivity,
+                                        arrayOf(premission), REQUEST_CODE_ASK_STORAGE)
+                            }
+                            .setNegativeButton("取消") { dialog, _ -> dialog.dismiss() }.show()
+                } else {
+                    //请求权限
+                    ActivityCompat.requestPermissions(this,
+                            arrayOf(premission), REQUEST_CODE_ASK_STORAGE)
+                }
+            } else {
+                if (premission == Manifest.permission.WRITE_EXTERNAL_STORAGE) {
+                    initAssets()
+                }
+            }
         }
     }
 
-    /**
-     * 监听进程被杀消息，在进程被杀后记录该进程proc/{pid}/io下的数据
-     */
-    private fun registerService() {
-        try {
-            val activityManagerNative = Class.forName("android.app.ActivityManagerNative")
-            val getDefaultMethod = activityManagerNative.getMethod("getDefault")
-            val iActivityManager = getDefaultMethod.invoke(null)//null as Array<Any>?, null as Array<Any>?
-            if (iActivityManager != null) {
-                val registerMethod = activityManagerNative.getMethod("registerProcessObserver", IProcessObserver::class.java)
-                registerMethod.invoke(iActivityManager, mProcessObserver)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            REQUEST_CODE_ASK_STORAGE -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d("picher", "授权同意：$grantResults[0]")
+                initAssets()
+            } else {
+                Toast.makeText(this@MainActivity, "拒绝授权！", Toast.LENGTH_SHORT).show()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
+    }
 
+    private fun initAssets() {
+        Executors.newSingleThreadExecutor().submit { Utils.copyFileFromAssets(applicationContext, "iotop.sh", BACK_UP_FILE) }
     }
 }

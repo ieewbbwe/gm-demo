@@ -26,5 +26,9 @@ public class MainContract {
         IOBean queryById(String id);
 
         List<IOBean> queryAll();
+
+        String executeShell(String shell);
+
+        void registerService();
     }
 }

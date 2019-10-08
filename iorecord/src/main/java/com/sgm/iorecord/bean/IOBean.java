@@ -117,4 +117,18 @@ public class IOBean {
     }
 
 
+    @Override
+    public String toString() {
+        return "IOBean{" +
+                "id=" + id +
+                ", rchar='" + rchar + '\'' +
+                ", wchar='" + wchar + '\'' +
+                ", syscr='" + syscr + '\'' +
+                ", syscw='" + syscw + '\'' +
+                ", read_bytes='" + read_bytes + '\'' +
+                ", write_bytes='" + write_bytes + '\'' +
+                ", cancelled_write_bytes='" + cancelled_write_bytes + '\'' +
+                ", date=" + date +
+                '}';
+    }
 }

@@ -21,23 +21,23 @@ public class IOListAdapter extends RecyclerView.Adapter<IOListAdapter.ViewHolder
 
     public void setData(List<IOBean> data) {
         this.ioBeans = data;
-        notifyDataSetChanged();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.ioban_list_layout, null, false));
+        return new ViewHolder(LayoutInflater.from(parent.getContext()
+        ).inflate(R.layout.ioban_list_layout, parent, false));
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         IOBean item = ioBeans.get(position);
-        holder.mContentTv.setText(item.getDate().toString());
+        holder.mContentTv.setText(item.toString());
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return ioBeans == null ? 0 : ioBeans.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
