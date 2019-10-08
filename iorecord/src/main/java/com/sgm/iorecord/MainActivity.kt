@@ -33,6 +33,7 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
         mPresenter = MainPresenter(this)
 
         m_register_bt.setOnClickListener(this)
+        m_execute_bt.setOnClickListener(this)
         m_insert_bt.setOnClickListener(this)
         m_query_bt.setOnClickListener(this)
         m_delete_bt.setOnClickListener(this)
@@ -49,8 +50,9 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.m_register_bt -> mPresenter?.registerService()
+            R.id.m_execute_bt -> showToast(mPresenter?.executeShell("ps"))
             R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOBean())
-            R.id.m_delete_bt -> showToast(mPresenter?.executeShell("ls"))
+            R.id.m_delete_bt -> showToast("doing")
             R.id.m_update_bt -> showToast("doing")
             R.id.m_query_bt -> {
                 mList!!.clear()
