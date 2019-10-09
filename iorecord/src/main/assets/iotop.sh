@@ -5,22 +5,29 @@
 
 show_help() {
 cat << EOL
+
 Usage: ./iotop.sh [-h -m -b --show_skips]
+
 Show the I/O usage on per-app/per-process basis.
 READ and WRITTEN show the total amount of bytes read or written
 to the storage per process.
 READ_SPEED and WRITE_SPEED show the current read and write speeds.
+
 Default behavior is to show all units in kb.
+
     -h   | --help           Display this help and exit
     -m   | --mb             Change units to MB
     -b   | --bytes          Change units to bytes
     --show_skips            Print a message when skipping a process
                              with no I/O activity
     --only                  Skip processes with no I/O activity
+
+
 Please note that this script is still in an early stage, which is
 why it does not yet support all features iotop for PCs has.
 If you want to contribute, feel free to fork the repo and issue
 a pull request.
+
 EOL
 }
 
@@ -194,3 +201,4 @@ done
 
 echo " PID		READ		WRITTEN		READ_SPEED		WRITE_SPEED		PROCESS"
 echo -e "$new"
+

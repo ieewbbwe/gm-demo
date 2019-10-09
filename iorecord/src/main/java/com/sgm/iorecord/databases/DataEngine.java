@@ -18,6 +18,11 @@ public class DataEngine {
         return DataEngineHolder.instance;
     }
 
+    /**
+     * for test
+     *
+     * @return IOBean
+     */
     public IOBean createIOBean() {
         IOBean ioBean = new IOBean();
         ioBean.setWchar("1231231");

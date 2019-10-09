@@ -27,7 +27,10 @@ public class MainContract {
 
         List<IOBean> queryAll();
 
+        @Deprecated
         String executeShell(String shell);
+
+        CommandExecution.CommandResult executeShell(String shell, boolean isRoot);
 
         void registerService();
     }

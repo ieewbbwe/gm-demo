@@ -8,7 +8,7 @@ import java.util.Date;
 
 /**
  * Created by s2s8tb on 2019/9/26.
- * proc/{pid}/io 实体类
+ * 参照proc/{pid}/io 定义的实体类
  */
 
 @Entity

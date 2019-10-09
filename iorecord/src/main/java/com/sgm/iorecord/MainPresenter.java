@@ -7,9 +7,6 @@ import android.util.Log;
 import com.sgm.iorecord.bean.IOBean;
 import com.sgm.iorecord.databases.DbController;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -20,6 +17,7 @@ import java.util.List;
 public class MainPresenter implements MainContract.Persenter {
 
     private MainContract.View mView;
+    private static final String TAG = "MainPresenter";
 
     public MainPresenter(MainContract.View view) {
         this.mView = view;
@@ -58,27 +56,20 @@ public class MainPresenter implements MainContract.Persenter {
 
     @Override
     public String executeShell(String shell) {
-        Runtime mRuntime = Runtime.getRuntime();
-        try {
-            //Process中封装了返回的结果和执行错误的结果
-            Process mProcess = mRuntime.exec(shell);
-            BufferedReader mReader = new BufferedReader(new InputStreamReader(mProcess.getInputStream()));
-            StringBuffer mRespBuff = new StringBuffer();
-            char[] buff = new char[1024];
-            int ch = 0;
-            while ((ch = mReader.read(buff)) != -1) {
-                mRespBuff.append(buff, 0, ch);
-            }
-            mReader.close();
-            System.out.print("result1" + mRespBuff.toString());
-            return mRespBuff.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+        return Utils.executeShell(shell);
     }
 
+    @Override
+    public CommandExecution.CommandResult executeShell(String shell, boolean isRoot) {
+        CommandExecution.CommandResult result = CommandExecution.execCommand(shell, isRoot);
+        Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
+                result.errorMsg, result.successMsg, result.result));
+        return result;
+    }
+
+    /**
+     * 注册监听应用被杀掉的服务
+     */
     @Override
     public void registerService() {
         try {
