@@ -14,7 +14,9 @@ import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
 import com.sgm.iorecord.bean.IOBean
+import com.sgm.iorecord.bean.IOTopBean
 import com.sgm.iorecord.databases.DataEngine
+import com.sgm.iorecord.listener.IShellCallBack
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
 import java.io.File
@@ -22,9 +24,17 @@ import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListener {
 
+    override fun hideLoadding() {
+        showToast("加载完成！")
+    }
+
+    override fun showLoadding() {
+        showToast("Loadding...")
+    }
+
     var mPresenter: MainPresenter? = null
     var mAdapter: IOListAdapter? = IOListAdapter()
-    var mList: MutableList<IOBean>? = mutableListOf()
+    var mList: MutableList<IOTopBean>? = mutableListOf()
     private val BACK_UP_FILE = (Environment.getExternalStorageDirectory().path + File.separator + "iorecord")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,10 +61,20 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
         when (v?.id) {
             R.id.m_register_bt -> mPresenter?.registerService()
             R.id.m_execute_bt -> {
-                val result = mPresenter?.executeShell("sh $BACK_UP_FILE/iotop.sh", false)//m_shell_et.text.trim().toString()
-                m_main_content_tv.text = if (result?.result == 1) result.successMsg else result?.errorMsg
+//                mPresenter?.executeShell("sh $BACK_UP_FILE/iotop.sh", false, object : IShellCallBack {
+//                    override fun onShellStart() {
+//                        showToast("开始查询数据！")
+//                    }
+//
+//                    override fun onShellExecuted(result: CommandExecution.CommandResult?) {
+//                        showToast("数据查询完成！")
+//                        mPresenter?.convertToIOBeanListFromResult(result)
+//                        m_main_content_tv.text = if (result?.errorMsg?.isEmpty()!!) result.successMsg else result.errorMsg
+//                    }
+//                })
+                mPresenter?.executeShellAndDB("sh $BACK_UP_FILE/iotop.sh", false)
             }
-            R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOBean())
+            R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOTopBean())
             R.id.m_delete_bt -> showToast("doing")
             R.id.m_update_bt -> showToast("doing")
             R.id.m_query_bt -> {

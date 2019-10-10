@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.sgm.iorecord.R;
 import com.sgm.iorecord.bean.IOBean;
+import com.sgm.iorecord.bean.IOTopBean;
 
 import java.util.List;
 
@@ -17,9 +18,9 @@ import java.util.List;
 
 public class IOListAdapter extends RecyclerView.Adapter<IOListAdapter.ViewHolder> {
 
-    private List<IOBean> ioBeans;
+    private List<IOTopBean> ioBeans;
 
-    public void setData(List<IOBean> data) {
+    public void setData(List<IOTopBean> data) {
         this.ioBeans = data;
     }
 
@@ -31,7 +32,7 @@ public class IOListAdapter extends RecyclerView.Adapter<IOListAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        IOBean item = ioBeans.get(position);
+        IOTopBean item = ioBeans.get(position);
         holder.mContentTv.setText(item.toString());
     }
 

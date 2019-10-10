@@ -30,6 +30,12 @@
                 android:layout_height="wrap_content"
                 android:text="执行脚本" />
 
+            <Button
+                android:id="@+id/m_chart_bt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="图表化视图" />
+
             <include
                 layout="@layout/databases_layout"
                 android:layout_width="wrap_content"

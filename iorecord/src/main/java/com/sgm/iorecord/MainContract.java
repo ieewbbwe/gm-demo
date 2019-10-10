@@ -1,6 +1,10 @@
 package com.sgm.iorecord;
 
 import com.sgm.iorecord.bean.IOBean;
+import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.listener.IShellCallBack;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -12,6 +16,10 @@ public class MainContract {
 
     public interface View {
         void showToast(String str);
+
+        void showLoadding();
+
+        void hideLoadding();
     }
 
     public interface Persenter {
@@ -19,19 +27,23 @@ public class MainContract {
 
         void registerProcessListener();
 
-        void insertIOList(List<IOBean> ioBeans);
+        void insertIOList(List<IOTopBean> ioBeans);
 
-        void insertIOData(IOBean ioBean);
+        void insertIOData(IOTopBean ioBean);
 
-        IOBean queryById(String id);
+        IOTopBean queryById(String id);
 
-        List<IOBean> queryAll();
+        List<IOTopBean> queryAll();
 
         @Deprecated
         String executeShell(String shell);
 
-        CommandExecution.CommandResult executeShell(String shell, boolean isRoot);
+        void executeShell(String shell, boolean isRoot, IShellCallBack shellCallBack);
+
+        void executeShellAndDB(final String shell, final boolean isRoot);
 
         void registerService();
+
+        List<IOTopBean> convertToIOBeanListFromResult(@Nullable CommandExecution.CommandResult result);
     }
 }
