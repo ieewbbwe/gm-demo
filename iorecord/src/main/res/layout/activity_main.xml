@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.sgm.iorecord.MainActivity">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/m_register_bt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="注册监听" />
+
+            <Button
+                android:id="@+id/m_execute_bt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="执行脚本" />
+
+            <include
+                layout="@layout/databases_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintLeft_toRightOf="@+id/m_register_bt" />
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
+    <EditText
+        android:id="@+id/m_shell_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="place input shell script!!"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/m_main_content_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/m_record_rlv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/m_register_bt" />
+
+</LinearLayout>
