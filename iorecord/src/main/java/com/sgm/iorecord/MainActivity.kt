@@ -13,10 +13,10 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
-import com.sgm.iorecord.bean.IOBean
 import com.sgm.iorecord.bean.IOTopBean
 import com.sgm.iorecord.databases.DataEngine
-import com.sgm.iorecord.listener.IShellCallBack
+import com.sgm.iorecord.event.RXLoadIoTopAllEvent
+import com.sgm.iorecord.event.rx.RxBus
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
 import java.io.File
@@ -55,35 +55,27 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
             adapter = mAdapter
         }
         reqPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+        //Regist queryAll callBack
+        RxBus.get().doSubscribe(RXLoadIoTopAllEvent::class.java, {
+            mList!!.clear()
+            mList!!.addAll(it.ioTopBeans)
+            showToast("Query succeed size:" + mList!!.size)
+            mAdapter!!.setData(mList)
+            mAdapter!!.notifyDataSetChanged()
+        }, {
+            it.printStackTrace()
+        })
     }
 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.m_register_bt -> mPresenter?.registerService()
-            R.id.m_execute_bt -> {
-//                mPresenter?.executeShell("sh $BACK_UP_FILE/iotop.sh", false, object : IShellCallBack {
-//                    override fun onShellStart() {
-//                        showToast("开始查询数据！")
-//                    }
-//
-//                    override fun onShellExecuted(result: CommandExecution.CommandResult?) {
-//                        showToast("数据查询完成！")
-//                        mPresenter?.convertToIOBeanListFromResult(result)
-//                        m_main_content_tv.text = if (result?.errorMsg?.isEmpty()!!) result.successMsg else result.errorMsg
-//                    }
-//                })
-                mPresenter?.executeShellAndDB("sh $BACK_UP_FILE/iotop.sh", false)
-            }
+            R.id.m_execute_bt -> mPresenter?.executeShellAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOTopBean())
             R.id.m_delete_bt -> showToast("doing")
             R.id.m_update_bt -> showToast("doing")
-            R.id.m_query_bt -> {
-                mList!!.clear()
-                mList!!.addAll(mPresenter?.queryAll()!!)
-                showToast("Query succeed size:" + mList!!.size)
-                mAdapter!!.setData(mList)
-                mAdapter!!.notifyDataSetChanged()
-            }
+            R.id.m_query_bt -> mPresenter?.queryAll()
         }
     }
 
@@ -132,5 +124,10 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
 
     private fun initAssets() {
         Executors.newSingleThreadExecutor().submit { Utils.copyFileFromAssets(applicationContext, "iotop.sh", BACK_UP_FILE) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        RxBus.get().unSubscription(RXLoadIoTopAllEvent::class.java)
     }
 }

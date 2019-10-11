@@ -33,14 +33,14 @@ public class MainContract {
 
         IOTopBean queryById(String id);
 
-        List<IOTopBean> queryAll();
+        void queryAll();
 
         @Deprecated
         String executeShell(String shell);
 
         void executeShell(String shell, boolean isRoot, IShellCallBack shellCallBack);
 
-        void executeShellAndDB(final String shell, final boolean isRoot);
+        void executeShellAndDBAsync(final String shell, final boolean isRoot);
 
         void registerService();
 

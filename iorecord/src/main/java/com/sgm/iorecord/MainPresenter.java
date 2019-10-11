@@ -1,6 +1,7 @@
 package com.sgm.iorecord;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.IProcessObserver;
 import android.os.RemoteException;
 import android.text.TextUtils;
@@ -11,6 +12,8 @@ import com.sgm.iorecord.bean.IOBean;
 import com.sgm.iorecord.bean.IOTopBean;
 import com.sgm.iorecord.chart.ChartContract;
 import com.sgm.iorecord.databases.DbController;
+import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
+import com.sgm.iorecord.event.rx.RxBus;
 import com.sgm.iorecord.listener.IShellCallBack;
 
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +63,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void insertIOData(IOTopBean ioBean) {
         long l = DbController.getInstance().getSession().getIOTopBeanDao().insert(ioBean);
-        mView.showToast("插入成功：" + l);
+        mView.showToast("插入成功Id：" + l);
     }
 
     @Override
@@ -69,8 +72,21 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public List<IOTopBean> queryAll() {
-        return DbController.getInstance().getSession().getIOTopBeanDao().loadAll();
+    public void queryAll() {
+        Observable.create(new ObservableOnSubscribe<List<IOTopBean>>() {
+            @Override
+            public void subscribe(ObservableEmitter<List<IOTopBean>> emitter) throws Exception {
+                emitter.onNext(DbController.getInstance().getSession().getIOTopBeanDao().loadAll());
+                emitter.onComplete();
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<List<IOTopBean>>() {
+                    @Override
+                    public void accept(List<IOTopBean> ioTopBeans) throws Exception {
+                        RxBus.get().post(new RXLoadIoTopAllEvent(ioTopBeans));
+                    }
+                });
+        //return DbController.getInstance().getSession().getIOTopBeanDao().loadAll();
     }
 
     @Override
@@ -100,7 +116,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void executeShellAndDB(final String shell, final boolean isRoot) {
+    public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoadding();
         Observable.create(new ObservableOnSubscribe<CommandExecution.CommandResult>() {
             @Override
@@ -123,25 +139,12 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 return ioTopBeans;
             }
         }).subscribeOn(Schedulers.single()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe();
-    }
-
-    /**
-     * 注册监听应用被杀掉的服务
-     */
-    @Override
-    public void registerService() {
-        try {
-            Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
-            Method getDefaultMethod = activityManagerNative.getMethod("getDefault");
-            Object iActivityManager = getDefaultMethod.invoke(null);//null as Array<Any>?, null as Array<Any>?
-            if (iActivityManager != null) {
-                Method registerMethod = activityManagerNative.getMethod("registerProcessObserver", IProcessObserver.class);
-                registerMethod.invoke(iActivityManager, mProcessObserver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                .subscribe(new Consumer<List<IOTopBean>>() {
+                    @Override
+                    public void accept(List<IOTopBean> ioTopBeans) throws Exception {
+                        mView.hideLoadding();
+                    }
+                });
     }
 
     @Override
@@ -158,6 +161,36 @@ public class MainPresenter extends BasePresenter<MainContract.View>
             }
         }
         return ioBeans;
+    }
+
+    /**
+     * 注册监听应用被杀掉的服务
+     */
+    @Override
+    public void registerService() {
+//        try {
+//            Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
+//            Method getDefaultMethod = activityManagerNative.getMethod("getDefault");
+//            Object iActivityManager = getDefaultMethod.invoke(null);//null as Array<Any>?, null as Array<Any>?
+//            if (iActivityManager != null) {
+//                Method registerMethod = activityManagerNative.getMethod("registerProcessObserver", IProcessObserver.class);
+//                registerMethod.invoke(iActivityManager, mProcessObserver);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        try {
+            Class activityManager = Class.forName("android.app.ActivityManager");
+            Method getDefaultMethod = activityManager.getMethod("getService");
+            Object iActivityManager = getDefaultMethod.invoke(null);
+            if (iActivityManager != null) {
+                Method registerMethod = iActivityManager.getClass().getMethod("registerProcessObserver", IProcessObserver.class);
+                registerMethod.invoke(iActivityManager, mProcessObserver);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
