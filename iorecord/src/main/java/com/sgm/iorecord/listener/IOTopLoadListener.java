@@ -1,6 +1,6 @@
 package com.sgm.iorecord.listener;
 
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.List;
 

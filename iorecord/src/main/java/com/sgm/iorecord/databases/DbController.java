@@ -3,9 +3,9 @@ package com.sgm.iorecord.databases;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.sgm.iorecord.bean.DaoMaster;
-import com.sgm.iorecord.bean.DaoSession;
-import com.sgm.iorecord.bean.IOBeanDao;
+import com.sgm.iorecord.model.DaoMaster;
+import com.sgm.iorecord.model.DaoSession;
+import com.sgm.iorecord.model.IOBeanDao;
 
 /**
  * Created by s2s8tb on 2019/9/26.

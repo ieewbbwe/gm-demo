@@ -1,4 +1,4 @@
-package com.sgm.iorecord;
+package com.sgm.iorecord.utils;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;

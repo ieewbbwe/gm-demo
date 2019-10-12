@@ -13,10 +13,11 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
-import com.sgm.iorecord.bean.IOTopBean
+import com.sgm.iorecord.model.IOTopBean
 import com.sgm.iorecord.databases.DataEngine
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent
 import com.sgm.iorecord.event.rx.RxBus
+import com.sgm.iorecord.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
 import java.io.File

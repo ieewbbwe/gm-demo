@@ -7,8 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.sgm.iorecord.R;
-import com.sgm.iorecord.bean.IOBean;
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.List;
 

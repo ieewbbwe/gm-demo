@@ -1,4 +1,4 @@
-package com.sgm.iorecord.bean;
+package com.sgm.iorecord.model;
 
 import org.greenrobot.greendao.annotation.Entity;
 import org.greenrobot.greendao.annotation.Generated;

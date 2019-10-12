@@ -1,7 +1,8 @@
 package com.sgm.iorecord.databases;
 
-import com.sgm.iorecord.bean.IOBean;
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.utils.CommandExecution;
+import com.sgm.iorecord.model.IOBean;
+import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.Date;
 
@@ -11,6 +12,13 @@ import java.util.Date;
  */
 
 public class DataEngine {
+
+    public CommandExecution.CommandResult createCommandResult() {
+        CommandExecution.CommandResult result = new CommandExecution.CommandResult();
+        result.result = 1;
+        result.successMsg = "1192,32,22,34,64,com.sgm.iorecord;1193,32,22,34,64,com.sgm.rwutils";
+        return result;
+    }
 
     private static class DataEngineHolder {
         static final DataEngine instance = new DataEngine();

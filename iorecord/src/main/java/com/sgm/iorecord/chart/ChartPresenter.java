@@ -1,13 +1,10 @@
 package com.sgm.iorecord.chart;
 
 import com.sgm.iorecord.base.BasePresenter;
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
-import com.sgm.iorecord.event.RxEvent;
-import com.sgm.iorecord.event.RxEventBus;
 import com.sgm.iorecord.event.rx.RxBus;
-import com.sgm.iorecord.listener.IOTopLoadListener;
 
 import java.util.List;
 
@@ -15,7 +12,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 

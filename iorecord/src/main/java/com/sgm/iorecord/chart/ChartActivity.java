@@ -6,12 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.sgm.iorecord.R;
-import com.sgm.iorecord.bean.IOTopBean;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
 import com.sgm.iorecord.event.rx.RxBus;
-import com.sgm.iorecord.listener.IOTopLoadListener;
-
-import java.util.List;
 
 import io.reactivex.functions.Consumer;
 

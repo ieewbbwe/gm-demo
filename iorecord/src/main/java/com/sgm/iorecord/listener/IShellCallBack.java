@@ -1,6 +1,6 @@
 package com.sgm.iorecord.listener;
 
-import com.sgm.iorecord.CommandExecution;
+import com.sgm.iorecord.utils.CommandExecution;
 
 public interface IShellCallBack {
     void onShellStart();

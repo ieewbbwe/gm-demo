@@ -6,12 +6,12 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.sgm.iorecord.base.BasePresenter;
-import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
 import com.sgm.iorecord.event.rx.RxBus;
 import com.sgm.iorecord.listener.IShellCallBack;
+import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.utils.CommandExecution;
 import com.sgm.iorecord.utils.Utils;
 
@@ -35,10 +35,10 @@ import io.reactivex.schedulers.Schedulers;
  * Created by s2s8tb on 2019/9/26.
  */
 
-public class MainPresenter extends BasePresenter<MainContract.View>
+public class MainCleanPresenter extends BasePresenter<MainContract.View>
         implements MainContract.Persenter {
 
-    public MainPresenter(MainContract.View view) {
+    public MainCleanPresenter(MainContract.View view) {
         super(view);
     }
 

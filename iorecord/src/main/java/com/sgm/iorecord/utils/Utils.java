@@ -1,4 +1,4 @@
-package com.sgm.iorecord;
+package com.sgm.iorecord.utils;
 
 import android.content.Context;
 import android.util.Log;

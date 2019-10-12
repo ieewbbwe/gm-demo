@@ -1,8 +1,8 @@
 package com.sgm.iorecord;
 
-import com.sgm.iorecord.bean.IOBean;
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.listener.IShellCallBack;
+import com.sgm.iorecord.utils.CommandExecution;
 
 import org.jetbrains.annotations.Nullable;
 

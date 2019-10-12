@@ -1,6 +1,6 @@
 package com.sgm.iorecord.event;
 
-import com.sgm.iorecord.bean.IOTopBean;
+import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.event.rx.BaseRxBusEvent;
 
 import java.util.List;

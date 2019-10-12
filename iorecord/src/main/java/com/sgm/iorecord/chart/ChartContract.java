@@ -1,7 +1,6 @@
 package com.sgm.iorecord.chart;
 
-import com.sgm.iorecord.bean.IOTopBean;
-import com.sgm.iorecord.listener.IOTopLoadListener;
+import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.List;
 
