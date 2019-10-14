@@ -1,7 +1,10 @@
 package com.sgm.iorecord.useCase.main;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.sgm.iorecord.BuildConfig;
+import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.useCase.UseCase;
 import com.sgm.iorecord.utils.CommandExecution;
 
@@ -14,8 +17,12 @@ public class ShellTask extends UseCase<ShellTask.RequestValues, ShellTask.Respon
 
     @Override
     protected void executeUseCase(RequestValues requestValues) {
-        CommandExecution.CommandResult result = CommandExecution
-                .execCommand(requestValues.getShellSpript(), requestValues.isRoot());
+        CommandExecution.CommandResult result;
+        if (BuildConfig.DEV_MODE) {
+            result = DataEngine.gerInstance().createCommandResult();
+        } else {
+            result = CommandExecution.execCommand(requestValues.getShellSpript(), requestValues.isRoot());
+        }
         getUseCaseCallback().onSuccess(new ResponseValue(result));
     }
 

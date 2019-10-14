@@ -1,45 +1,49 @@
 package com.sgm.iorecord;
 
-import android.app.IProcessObserver;
-import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.sgm.iorecord.base.BasePresenter;
-import com.sgm.iorecord.model.IOTopBean;
-import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
 import com.sgm.iorecord.event.rx.RxBus;
 import com.sgm.iorecord.listener.IShellCallBack;
+import com.sgm.iorecord.model.IOTopBean;
+import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
+import com.sgm.iorecord.useCase.UseCase;
+import com.sgm.iorecord.useCase.UseCaseHandler;
+import com.sgm.iorecord.useCase.main.InsertIOTopTask;
+import com.sgm.iorecord.useCase.main.QueryTask;
+import com.sgm.iorecord.useCase.main.RegisterTask;
+import com.sgm.iorecord.useCase.main.ShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
-import com.sgm.iorecord.utils.Utils;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by s2s8tb on 2019/9/26.
  */
 
 public class MainPresenter extends BasePresenter<MainContract.View>
-        implements MainContract.Persenter {
+        implements MainContract.Presenter {
+
+    private final ShellTask mShellTask;
+    private final UseCaseHandler mUseCaseHandler;
+    private final InsertIOTopTask mInsertTask;
+    private final QueryTask mQueryTask;
+    private final RegisterTask mRegisterTask;
 
     public MainPresenter(MainContract.View view) {
         super(view);
+        mShellTask = new ShellTask();
+        mUseCaseHandler = UseCaseHandler.getInstance();
+        mInsertTask = new InsertIOTopTask();
+        mQueryTask = new QueryTask();
+        mRegisterTask = new RegisterTask();
     }
 
 
@@ -54,11 +58,6 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void insertIOList(List<IOTopBean> ioBeans) {
-        DbController.getInstance().getSession().startAsyncSession().insertInTx(IOTopBean.class, ioBeans);
-    }
-
-    @Override
     public void insertIOData(IOTopBean ioBean) {
         long l = DbController.getInstance().getSession().getIOTopBeanDao().insert(ioBean);
         mView.showToast("插入成功Id：" + l);
@@ -70,95 +69,80 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void queryAll() {
-        Observable.create(new ObservableOnSubscribe<List<IOTopBean>>() {
+    public void insertIOList(List<IOTopBean> ioBeans) {
+        mUseCaseHandler.execute(mInsertTask, new InsertIOTopTask.RequestValues(ioBeans), new SimpleUseCaseCallBack<InsertIOTopTask.ResponseValue>() {
             @Override
-            public void subscribe(ObservableEmitter<List<IOTopBean>> emitter) throws Exception {
-                emitter.onNext(DbController.getInstance().getSession().getIOTopBeanDao().loadAll());
-                emitter.onComplete();
+            public void onSuccess(InsertIOTopTask.ResponseValue response) {
+                mView.hideLoadding();
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<IOTopBean>>() {
-                    @Override
-                    public void accept(List<IOTopBean> ioTopBeans) throws Exception {
-                        RxBus.get().post(new RXLoadIoTopAllEvent(ioTopBeans));
-                    }
-                });
-        //return DbController.getInstance().getSession().getIOTopBeanDao().loadAll();
+        });
+
     }
 
     @Override
-    public String executeShell(String shell) {
-        return Utils.executeShell(shell);
+    public void queryAll() {
+        mUseCaseHandler.execute(mQueryTask, new QueryTask.RequestValues(), new SimpleUseCaseCallBack<QueryTask.ResponseValue>() {
+            @Override
+            public void onSuccess(QueryTask.ResponseValue response) {
+                RxBus.get().post(new RXLoadIoTopAllEvent(response.getIoTopBeans()));
+            }
+        });
     }
 
     @Override
     public void executeShell(final String shell, final boolean isRoot, final IShellCallBack shellCallBack) {
         shellCallBack.onShellStart();
-        Observable.create(new ObservableOnSubscribe<CommandExecution.CommandResult>() {
+        mUseCaseHandler.execute(mShellTask, new ShellTask.RequestValues(shell), new UseCase.UseCaseCallback<ShellTask.ResponseValue>() {
             @Override
-            public void subscribe(ObservableEmitter<CommandExecution.CommandResult> emitter) throws Exception {
-                CommandExecution.CommandResult result = CommandExecution.execCommand(shell, isRoot);
-                emitter.onNext(result);
-                emitter.onComplete();
+            public void onSuccess(ShellTask.ResponseValue response) {
+                CommandExecution.CommandResult result = response.getResult();
+                Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
+                        result.errorMsg, result.successMsg, result.result));
+                shellCallBack.onShellExecuted(result);
             }
-        }).subscribeOn(Schedulers.single()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<CommandExecution.CommandResult>() {
-                    @Override
-                    public void accept(CommandExecution.CommandResult result) throws Exception {
-                        Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
-                                result.errorMsg, result.successMsg, result.result));
-                        shellCallBack.onShellExecuted(result);
-                    }
-                });
+
+            @Override
+            public void onError() {
+                Log.d(TAG, "executeShell Error!");
+            }
+        });
     }
 
     @Override
     public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoadding();
-        Observable.create(new ObservableOnSubscribe<CommandExecution.CommandResult>() {
+        mUseCaseHandler.execute(mShellTask, new ShellTask.RequestValues(shell), new SimpleUseCaseCallBack<ShellTask.ResponseValue>() {
             @Override
-            public void subscribe(ObservableEmitter<CommandExecution.CommandResult> emitter) throws Exception {
-                CommandExecution.CommandResult result;
-                if (BuildConfig.DEV_MODE) {
-                    result = DataEngine.gerInstance().createCommandResult();
-                    Thread.sleep(2000);
-                } else {
-                    result = CommandExecution.execCommand(shell, isRoot);
-                }
-                emitter.onNext(result);
-                emitter.onComplete();
-            }
-        }).map(new Function<CommandExecution.CommandResult, List<IOTopBean>>() {
-            @Override
-            public List<IOTopBean> apply(CommandExecution.CommandResult result) throws Exception {
+            public void onSuccess(ShellTask.ResponseValue response) {
+                CommandExecution.CommandResult result = response.getResult();
                 Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
                         result.errorMsg, result.successMsg, result.result));
-                return convertToIOBeanListFromResult(result);
+                List<IOTopBean> ioTopBeans = convertToIOBeanListFromResult(response.getResult());
+                if (!ioTopBeans.isEmpty()) {
+                    insertIOList(ioTopBeans);
+                }
             }
-        }).filter(new Predicate<List<IOTopBean>>() {
+
+        });
+    }
+
+    /**
+     * 注册监听应用被杀掉的服务
+     */
+    @Override
+    public void registerService() {
+        mView.showToast("Start Register...");
+        mUseCaseHandler.execute(mRegisterTask, new RegisterTask.RequestValues(), new UseCase.UseCaseCallback<RegisterTask.ResponseValue>() {
             @Override
-            public boolean test(List<IOTopBean> ioTopBeans) throws Exception {
-                return !ioTopBeans.isEmpty();
+            public void onSuccess(RegisterTask.ResponseValue response) {
+                mView.showToast("Register succeed");
             }
-        }).map(new Function<List<IOTopBean>, List<IOTopBean>>() {
+
             @Override
-            public List<IOTopBean> apply(List<IOTopBean> ioTopBeans) throws Exception {
-                DbController.getInstance().getSession().getIOTopBeanDao().insertInTx(ioTopBeans);
-                return ioTopBeans;
+            public void onError() {
+                mView.showToast("Register error");
             }
-        }).subscribeOn(Schedulers.single()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<IOTopBean>>() {
-                    @Override
-                    public void accept(List<IOTopBean> ioTopBeans) throws Exception {
-                        mView.hideLoadding();
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) throws Exception {
-                        throwable.printStackTrace();
-                    }
-                });
+        });
     }
 
     @Override
@@ -177,46 +161,4 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         return ioBeans;
     }
 
-    /**
-     * 注册监听应用被杀掉的服务
-     */
-    @Override
-    public void registerService() {
-//        try {
-//            Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
-//            Method getDefaultMethod = activityManagerNative.getMethod("getDefault");
-//            Object iActivityManager = getDefaultMethod.invoke(null);//null as Array<Any>?, null as Array<Any>?
-//            if (iActivityManager != null) {
-//                Method registerMethod = activityManagerNative.getMethod("registerProcessObserver", IProcessObserver.class);
-//                registerMethod.invoke(iActivityManager, mProcessObserver);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        try {
-            Class activityManager = Class.forName("android.app.ActivityManager");
-            Method getDefaultMethod = activityManager.getMethod("getService");
-            Object iActivityManager = getDefaultMethod.invoke(null);
-            if (iActivityManager != null) {
-                Method registerMethod = iActivityManager.getClass().getMethod("registerProcessObserver", IProcessObserver.class);
-                registerMethod.invoke(iActivityManager, mProcessObserver);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
-        @Override
-        public void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) throws RemoteException {
-            Log.d("picher", String.format("onForegroundActivitiesChanged ->> pid:%s，uid：%s", pid, uid));
-        }
-
-        @Override
-        public void onProcessDied(int pid, int uid) throws RemoteException {
-            Log.d("picher", String.format("onProcessDied ->> pid:%s，uid：%s", pid, uid));
-
-        }
-    };
 }

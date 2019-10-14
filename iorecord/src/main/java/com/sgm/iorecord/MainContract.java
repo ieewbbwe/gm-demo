@@ -22,7 +22,7 @@ public class MainContract {
         void hideLoadding();
     }
 
-    public interface Persenter {
+    public interface Presenter {
         void registerTimeRefreshService();
 
         void registerProcessListener();
@@ -34,9 +34,6 @@ public class MainContract {
         IOTopBean queryById(String id);
 
         void queryAll();
-
-        @Deprecated
-        String executeShell(String shell);
 
         void executeShell(String shell, boolean isRoot, IShellCallBack shellCallBack);
 
