@@ -1,25 +1,24 @@
 package com.sgm.iorecord.chart;
 
 import com.sgm.iorecord.base.BasePresenter;
-import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.databases.DbController;
-import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
-import com.sgm.iorecord.event.rx.RxBus;
+import com.sgm.iorecord.model.IOTopBean;
+import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
+import com.sgm.iorecord.useCase.UseCaseHandler;
+import com.sgm.iorecord.useCase.main.QueryTask;
 
 import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 
 public class ChartPresenter extends BasePresenter<ChartContract.View>
         implements ChartContract.Presenter {
 
+    private final QueryTask mQueryTask;
+    private final UseCaseHandler mUseCaseHandler;
+
     public ChartPresenter(ChartContract.View view) {
         super(view);
+        mQueryTask = new QueryTask();
+        mUseCaseHandler = UseCaseHandler.getInstance();
     }
 
     @Override
@@ -29,19 +28,13 @@ public class ChartPresenter extends BasePresenter<ChartContract.View>
 
     @Override
     public void queryIOTopAllAsync() {
-        Observable.create(new ObservableOnSubscribe<List<IOTopBean>>() {
+        mView.showToast("Loading...");
+        mUseCaseHandler.execute(mQueryTask, new QueryTask.RequestValues(), new SimpleUseCaseCallBack<QueryTask.ResponseValue>() {
             @Override
-            public void subscribe(ObservableEmitter<List<IOTopBean>> emitter) throws Exception {
-                emitter.onNext(DbController.getInstance().getSession().getIOTopBeanDao().loadAll());
-                emitter.onComplete();
+            public void onSuccess(QueryTask.ResponseValue response) {
+                mView.showPieChart(response.getIoTopBeans());
+                mView.showToast("load succeed!");
             }
-        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<IOTopBean>>() {
-                    @Override
-                    public void accept(List<IOTopBean> ioTopBeans) throws Exception {
-                        RxBus.get().post(new RXLoadIoTopAllEvent(ioTopBeans));
-                        //RxEventBus.getInstance().send(RxEvent.create(RxEvent.RxEventId.RX_LOAD_IOTOP_SUCCEED, ioTopBeans));
-                    }
-                });
+        });
     }
 }

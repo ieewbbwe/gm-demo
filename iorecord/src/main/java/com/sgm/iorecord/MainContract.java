@@ -1,7 +1,7 @@
 package com.sgm.iorecord;
 
-import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.listener.IShellCallBack;
+import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.utils.CommandExecution;
 
 import org.jetbrains.annotations.Nullable;
@@ -27,9 +27,9 @@ public class MainContract {
 
         void registerProcessListener();
 
-        void insertIOList(List<IOTopBean> ioBeans);
+        long insertIoTopBean(IOTopBean ioTopBean);
 
-        void insertIOData(IOTopBean ioBean);
+        void insertIOList(List<IOTopBean> ioBeans);
 
         IOTopBean queryById(String id);
 
@@ -41,6 +41,5 @@ public class MainContract {
 
         void registerService();
 
-        List<IOTopBean> convertToIOBeanListFromResult(@Nullable CommandExecution.CommandResult result);
     }
 }

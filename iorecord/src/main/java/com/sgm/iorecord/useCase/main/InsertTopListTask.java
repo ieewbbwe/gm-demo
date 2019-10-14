@@ -12,7 +12,7 @@ import java.util.List;
  * Created by s2s8tb on 2019/10/14.
  */
 
-public class InsertIOTopTask extends UseCase<InsertIOTopTask.RequestValues, InsertIOTopTask.ResponseValue> {
+public class InsertTopListTask extends UseCase<InsertTopListTask.RequestValues, InsertTopListTask.ResponseValue> {
 
     @Override
     protected void executeUseCase(RequestValues requestValues) {

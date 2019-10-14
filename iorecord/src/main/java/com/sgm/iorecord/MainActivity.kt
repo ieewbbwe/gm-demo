@@ -1,6 +1,7 @@
 package com.sgm.iorecord
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
@@ -13,10 +14,11 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
-import com.sgm.iorecord.model.IOTopBean
+import com.sgm.iorecord.chart.ChartActivity
 import com.sgm.iorecord.databases.DataEngine
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent
 import com.sgm.iorecord.event.rx.RxBus
+import com.sgm.iorecord.model.IOTopBean
 import com.sgm.iorecord.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
@@ -49,6 +51,7 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
         m_query_bt.setOnClickListener(this)
         m_delete_bt.setOnClickListener(this)
         m_update_bt.setOnClickListener(this)
+        m_chart_bt.setOnClickListener(this)
 
         mAdapter!!.setData(mList)
         m_record_rlv.apply {
@@ -73,7 +76,8 @@ class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListene
         when (v?.id) {
             R.id.m_register_bt -> mPresenter?.registerService()
             R.id.m_execute_bt -> mPresenter?.executeShellAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
-            R.id.m_insert_bt -> mPresenter?.insertIOData(DataEngine.gerInstance().createIOTopBean())
+            R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
+            R.id.m_insert_bt -> mPresenter?.insertIoTopBean(DataEngine.gerInstance().createIOTopBean())
             R.id.m_delete_bt -> showToast("doing")
             R.id.m_update_bt -> showToast("doing")
             R.id.m_query_bt -> mPresenter?.queryAll()

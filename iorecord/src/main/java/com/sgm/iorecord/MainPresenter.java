@@ -1,9 +1,9 @@
 package com.sgm.iorecord;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.sgm.iorecord.base.BasePresenter;
+import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
 import com.sgm.iorecord.event.rx.RxBus;
@@ -12,16 +12,13 @@ import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
 import com.sgm.iorecord.useCase.UseCase;
 import com.sgm.iorecord.useCase.UseCaseHandler;
-import com.sgm.iorecord.useCase.main.InsertIOTopTask;
+import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
+import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
 import com.sgm.iorecord.useCase.main.RegisterTask;
 import com.sgm.iorecord.useCase.main.ShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,17 +30,19 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     private final ShellTask mShellTask;
     private final UseCaseHandler mUseCaseHandler;
-    private final InsertIOTopTask mInsertTask;
+    private final InsertTopListTask mInsertTask;
     private final QueryTask mQueryTask;
     private final RegisterTask mRegisterTask;
+    private final InsertTopBeanTask mInsertTopBeanTask;
 
     public MainPresenter(MainContract.View view) {
         super(view);
         mShellTask = new ShellTask();
         mUseCaseHandler = UseCaseHandler.getInstance();
-        mInsertTask = new InsertIOTopTask();
+        mInsertTask = new InsertTopListTask();
         mQueryTask = new QueryTask();
         mRegisterTask = new RegisterTask();
+        mInsertTopBeanTask = new InsertTopBeanTask();
     }
 
 
@@ -58,9 +57,8 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void insertIOData(IOTopBean ioBean) {
-        long l = DbController.getInstance().getSession().getIOTopBeanDao().insert(ioBean);
-        mView.showToast("插入成功Id：" + l);
+    public long insertIoTopBean(IOTopBean ioTopBean) {
+        return DbController.getInstance().getSession().getIOTopBeanDao().insert(ioTopBean);
     }
 
     @Override
@@ -70,9 +68,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public void insertIOList(List<IOTopBean> ioBeans) {
-        mUseCaseHandler.execute(mInsertTask, new InsertIOTopTask.RequestValues(ioBeans), new SimpleUseCaseCallBack<InsertIOTopTask.ResponseValue>() {
+        mUseCaseHandler.execute(mInsertTask, new InsertTopListTask.RequestValues(ioBeans), new SimpleUseCaseCallBack<InsertTopListTask.ResponseValue>() {
             @Override
-            public void onSuccess(InsertIOTopTask.ResponseValue response) {
+            public void onSuccess(InsertTopListTask.ResponseValue response) {
                 mView.hideLoadding();
             }
         });
@@ -117,7 +115,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 CommandExecution.CommandResult result = response.getResult();
                 Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
                         result.errorMsg, result.successMsg, result.result));
-                List<IOTopBean> ioTopBeans = convertToIOBeanListFromResult(response.getResult());
+                List<IOTopBean> ioTopBeans = DataEngine.gerInstance().convertToIOBeanListFromResult(response.getResult());
                 if (!ioTopBeans.isEmpty()) {
                     insertIOList(ioTopBeans);
                 }
@@ -143,22 +141,6 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 mView.showToast("Register error");
             }
         });
-    }
-
-    @Override
-    public List<IOTopBean> convertToIOBeanListFromResult(@Nullable CommandExecution.CommandResult result) {
-        List<IOTopBean> ioBeans = new ArrayList<>();
-        if (result != null && !TextUtils.isEmpty(result.successMsg)) {
-            String[] lines = result.successMsg.split(";");
-            IOTopBean ioBean;
-            for (String line : lines) {
-                String[] processLine = line.split(",");
-                ioBean = new IOTopBean(processLine[0], processLine[1], processLine[2], processLine[3],
-                        processLine[4], processLine[5], new Date());
-                ioBeans.add(ioBean);
-            }
-        }
-        return ioBeans;
     }
 
 }

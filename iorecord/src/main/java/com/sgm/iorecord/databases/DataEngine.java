@@ -1,10 +1,16 @@
 package com.sgm.iorecord.databases;
 
-import com.sgm.iorecord.utils.CommandExecution;
+import android.text.TextUtils;
+
 import com.sgm.iorecord.model.IOBean;
 import com.sgm.iorecord.model.IOTopBean;
+import com.sgm.iorecord.utils.CommandExecution;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -49,5 +55,24 @@ public class DataEngine {
         ioBean.setWRITE_SPEED("455354545");
         ioBean.setDate(new Date());
         return ioBean;
+    }
+
+    public List<IOTopBean> convertToIOBeanListFromResult(@Nullable CommandExecution.CommandResult result) {
+        List<IOTopBean> ioBeans = new ArrayList<>();
+        if (result != null && !TextUtils.isEmpty(result.successMsg)) {
+            String[] lines = result.successMsg.split(";");
+            IOTopBean ioBean;
+            for (String line : lines) {
+                String[] processLine = line.split(",");
+                ioBean = new IOTopBean(processLine[0], processLine[1], processLine[2], processLine[3],
+                        processLine[4], processLine[5], new Date());
+                ioBeans.add(ioBean);
+            }
+        }
+        return ioBeans;
+    }
+
+    public void convertToBarDataFromTopList(List<IOTopBean> ioTopBeans) {
+
     }
 }
