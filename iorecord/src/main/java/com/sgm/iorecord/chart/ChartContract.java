@@ -1,14 +1,13 @@
 package com.sgm.iorecord.chart;
 
+import com.sgm.iorecord.base.BaseView;
 import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.List;
 
 public class ChartContract {
 
-    public interface View {
-
-        void showToast(String str);
+    public interface View extends BaseView{
 
         void showPieChart(List<IOTopBean> ioTopBeans);
 
@@ -19,5 +18,7 @@ public class ChartContract {
         List<IOTopBean> queryIOTopAll();
 
         void queryIOTopAllAsync();
+
+        void queryIOTopByPackage();
     }
 }

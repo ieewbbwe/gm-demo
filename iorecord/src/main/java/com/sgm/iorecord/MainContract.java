@@ -1,10 +1,8 @@
 package com.sgm.iorecord;
 
+import com.sgm.iorecord.base.BaseView;
 import com.sgm.iorecord.listener.IShellCallBack;
 import com.sgm.iorecord.model.IOTopBean;
-import com.sgm.iorecord.utils.CommandExecution;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -14,12 +12,8 @@ import java.util.List;
 
 public class MainContract {
 
-    public interface View {
-        void showToast(String str);
+    public interface View extends BaseView {
 
-        void showLoadding();
-
-        void hideLoadding();
     }
 
     public interface Presenter {

@@ -63,6 +63,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public IOTopBean queryById(String id) {
+
         return null;
     }
 
@@ -71,7 +72,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         mUseCaseHandler.execute(mInsertTask, new InsertTopListTask.RequestValues(ioBeans), new SimpleUseCaseCallBack<InsertTopListTask.ResponseValue>() {
             @Override
             public void onSuccess(InsertTopListTask.ResponseValue response) {
-                mView.hideLoadding();
+                mView.hideLoading();
             }
         });
 
@@ -108,7 +109,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
-        mView.showLoadding();
+        mView.showLoading();
         mUseCaseHandler.execute(mShellTask, new ShellTask.RequestValues(shell), new SimpleUseCaseCallBack<ShellTask.ResponseValue>() {
             @Override
             public void onSuccess(ShellTask.ResponseValue response) {

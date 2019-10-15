@@ -2,6 +2,9 @@ package com.sgm.iorecord.databases;
 
 import android.text.TextUtils;
 
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.sgm.iorecord.model.IOBean;
 import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.utils.CommandExecution;
@@ -10,7 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -22,7 +27,7 @@ public class DataEngine {
     public CommandExecution.CommandResult createCommandResult() {
         CommandExecution.CommandResult result = new CommandExecution.CommandResult();
         result.result = 1;
-        result.successMsg = "1192,32,22,34,64,com.sgm.iorecord;1193,32,22,34,64,com.sgm.rwutils";
+        result.successMsg = "1192,32,22,34,64,com.sgm.iorecord;1193,32,22,34,64,com.sgm.rwutils;1192,32,22,34,64,com.sgm.calendar";
         return result;
     }
 
@@ -72,7 +77,33 @@ public class DataEngine {
         return ioBeans;
     }
 
-    public void convertToBarDataFromTopList(List<IOTopBean> ioTopBeans) {
+    public void convertToPieDataFromTopList(List<IOTopBean> ioTopBeans) {
+       // combinByPackage(ioTopBeans);
+
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        for (IOTopBean item : ioTopBeans) {
+            //entries.add(new PieEntry(item.getWRITTEN(), ));
+        }
+
+        PieDataSet dataSet = new PieDataSet(entries, "Election Results");
+
+        PieData data = new PieData(dataSet);
 
     }
+
+//    private void combinByPackage(List<IOTopBean> ioTopBeans) {
+//        Map<String, Float> ioTopBeanMap = new HashMap<>();
+//        float packageWritten;
+//        for (IOTopBean ioTop : ioTopBeans) {
+//            packageWritten = ioTopBeanMap.get(ioTop.getPROCESS());
+//            if (packageWritten == null) {
+//                ioTopBeanMap.put(ioTop.getPROCESS(), Float.parseFloat(ioTop.getWRITTEN()));
+//            } else {
+//                ioTopBeanMap.get(ioTop.getPROCESS()) += Float.parseFloat(ioTop.getWRITTEN());
+//            }
+//            entries.add(new PieEntry(ioTop.getWRITTEN(), ));
+//        }
+//    }
+//
+
 }

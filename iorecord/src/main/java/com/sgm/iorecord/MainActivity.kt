@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
+import com.sgm.iorecord.base.BaseActivity
 import com.sgm.iorecord.chart.ChartActivity
 import com.sgm.iorecord.databases.DataEngine
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent
@@ -25,13 +26,13 @@ import kotlinx.android.synthetic.main.databases_layout.*
 import java.io.File
 import java.util.concurrent.Executors
 
-class MainActivity : AppCompatActivity(), MainContract.View, View.OnClickListener {
+class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
 
-    override fun hideLoadding() {
+    override fun hideLoading() {
         showToast("加载完成！")
     }
 
-    override fun showLoadding() {
+    override fun showLoading() {
         showToast("Loadding...")
     }
 

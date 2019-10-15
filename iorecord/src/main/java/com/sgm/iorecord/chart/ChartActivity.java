@@ -2,16 +2,15 @@ package com.sgm.iorecord.chart;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.sgm.iorecord.R;
+import com.sgm.iorecord.base.BaseActivity;
 import com.sgm.iorecord.model.IOTopBean;
 
 import java.util.List;
 
-public class ChartActivity extends AppCompatActivity implements ChartContract.View {
+public class ChartActivity extends BaseActivity implements ChartContract.View {
 
     private ChartPresenter mPresenter;
 
@@ -20,12 +19,8 @@ public class ChartActivity extends AppCompatActivity implements ChartContract.Vi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chart);
         mPresenter = new ChartPresenter(this);
-        mPresenter.queryIOTopAllAsync();
-    }
-
-    @Override
-    public void showToast(String str) {
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+        //mPresenter.queryIOTopAllAsync();
+        mPresenter.queryIOTopByPackage();
     }
 
     @Override
