@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">iorecord</string>
+    <string name="chart_data_present_change">数据/百分比 切换</string>
+    <string name="chart_line_target">线性标识</string>
 </resources>

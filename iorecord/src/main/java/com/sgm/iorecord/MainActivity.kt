@@ -28,14 +28,6 @@ import java.util.concurrent.Executors
 
 class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
 
-    override fun hideLoading() {
-        showToast("加载完成！")
-    }
-
-    override fun showLoading() {
-        showToast("Loadding...")
-    }
-
     var mPresenter: MainPresenter? = null
     var mAdapter: IOListAdapter? = IOListAdapter()
     var mList: MutableList<IOTopBean>? = mutableListOf()

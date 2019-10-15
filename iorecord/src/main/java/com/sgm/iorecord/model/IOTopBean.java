@@ -14,7 +14,7 @@ import java.util.Date;
 public class IOTopBean {
     @Id(autoincrement = true)//设置自增长
     private Long id;
-
+    /*process pid*/
     private String PID;
 
     @Override
@@ -31,11 +31,17 @@ public class IOTopBean {
                 '}';
     }
 
+    /*history read bytes*/
     private String READ;
+    /*history written bytes*/
     private String WRITTEN;
+    /*now read speed*/
     private String READ_SPEED;
+    /*now written speed*/
     private String WRITE_SPEED;
+    /*package name*/
     private String PROCESS;
+    /**/
     private Date date;
 
     public IOTopBean(String PID, String READ, String WRITTEN,

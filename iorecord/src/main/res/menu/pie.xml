@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/piePresentLine"
+        android:title="@string/chart_line_target"/>
+
+    <item
+        android:id="@+id/pieDataPresentChange"
+        android:title="@string/chart_data_present_change"/>
+</menu>

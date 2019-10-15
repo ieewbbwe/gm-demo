@@ -15,8 +15,6 @@ public class ChartContract {
     }
 
     public interface Presenter {
-        List<IOTopBean> queryIOTopAll();
-
         void queryIOTopAllAsync();
 
         void queryIOTopByPackage();

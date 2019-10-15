@@ -2,9 +2,10 @@ package com.sgm.iorecord.databases;
 
 import android.text.TextUtils;
 
-import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.MPPointF;
 import com.sgm.iorecord.model.IOBean;
 import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.utils.CommandExecution;
@@ -13,9 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Random;
 
 
 /**
@@ -54,10 +54,14 @@ public class DataEngine {
     }
 
     public IOTopBean createIOTopBean() {
+        String[] pros = new String[]{"com.sgm.iorecord", "com.sgm.rwutils", "com.sgm.calendar"};
         IOTopBean ioBean = new IOTopBean();
-        ioBean.setPID("1231231");
-        ioBean.setREAD("54545");
-        ioBean.setWRITE_SPEED("455354545");
+        ioBean.setPID(String.valueOf(new Random().nextInt(1000) + 1));
+        ioBean.setREAD(String.valueOf(new Random().nextInt(10000000)));
+        ioBean.setREAD_SPEED(String.valueOf(new Random().nextFloat() * 100));
+        ioBean.setWRITTEN(String.valueOf(new Random().nextInt(2000)));
+        ioBean.setWRITE_SPEED(String.valueOf(new Random().nextFloat() * 10));
+        ioBean.setPROCESS(pros[new Random().nextInt(2)]);
         ioBean.setDate(new Date());
         return ioBean;
     }
@@ -77,33 +81,44 @@ public class DataEngine {
         return ioBeans;
     }
 
-    public void convertToPieDataFromTopList(List<IOTopBean> ioTopBeans) {
-       // combinByPackage(ioTopBeans);
-
+    /**
+     * 将iotop数据转换为图表识别的数据
+     *
+     * @param ioTopBeans
+     * @return
+     */
+    public PieDataSet convertToPieDataFromTopList(List<IOTopBean> ioTopBeans) {
         ArrayList<PieEntry> entries = new ArrayList<>();
-        for (IOTopBean item : ioTopBeans) {
-            //entries.add(new PieEntry(item.getWRITTEN(), ));
+        for (IOTopBean top : ioTopBeans) {
+            entries.add(new PieEntry(Float.parseFloat(top.getWRITTEN()), top.getPROCESS()));
         }
 
-        PieDataSet dataSet = new PieDataSet(entries, "Election Results");
+        PieDataSet dataSet = new PieDataSet(entries, "Results Legends");
+        dataSet.setDrawIcons(false);
 
-        PieData data = new PieData(dataSet);
+        dataSet.setSliceSpace(3f);
+        dataSet.setIconsOffset(new MPPointF(0, 40));
+        dataSet.setSelectionShift(5f);
+        ArrayList<Integer> colors = new ArrayList<>();
 
+        for (int c : ColorTemplate.VORDIPLOM_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.JOYFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.COLORFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.LIBERTY_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.PASTEL_COLORS)
+            colors.add(c);
+        colors.add(ColorTemplate.getHoloBlue());
+        dataSet.setColors(colors);
+
+        return dataSet;
     }
-
-//    private void combinByPackage(List<IOTopBean> ioTopBeans) {
-//        Map<String, Float> ioTopBeanMap = new HashMap<>();
-//        float packageWritten;
-//        for (IOTopBean ioTop : ioTopBeans) {
-//            packageWritten = ioTopBeanMap.get(ioTop.getPROCESS());
-//            if (packageWritten == null) {
-//                ioTopBeanMap.put(ioTop.getPROCESS(), Float.parseFloat(ioTop.getWRITTEN()));
-//            } else {
-//                ioTopBeanMap.get(ioTop.getPROCESS()) += Float.parseFloat(ioTop.getWRITTEN());
-//            }
-//            entries.add(new PieEntry(ioTop.getWRITTEN(), ));
-//        }
-//    }
-//
 
 }

@@ -4,14 +4,10 @@ import android.util.Log;
 
 import com.sgm.iorecord.base.BasePresenter;
 import com.sgm.iorecord.chart.usecase.RawQueryTopTask;
-import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.databases.SqlScript;
-import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
 import com.sgm.iorecord.useCase.UseCaseHandler;
 import com.sgm.iorecord.useCase.main.QueryTask;
-
-import java.util.List;
 
 public class ChartPresenter extends BasePresenter<ChartContract.View>
         implements ChartContract.Presenter {
@@ -27,32 +23,35 @@ public class ChartPresenter extends BasePresenter<ChartContract.View>
         mByPackageTask = new RawQueryTopTask();
     }
 
-    @Override
-    public List<IOTopBean> queryIOTopAll() {
-        return DbController.getInstance().getSession().getIOTopBeanDao().loadAll();
-    }
-
+    /**
+     * 查询数据库中所有数据
+     */
     @Override
     public void queryIOTopAllAsync() {
-        mView.showToast("Loading...");
+        mView.showLoading();
         mUseCaseHandler.execute(mQueryTask, new QueryTask.RequestValues(), new SimpleUseCaseCallBack<QueryTask.ResponseValue>() {
             @Override
             public void onSuccess(QueryTask.ResponseValue response) {
-                mView.showPieChart(response.getIoTopBeans());
-                mView.showToast("load succeed!");
+                Log.d(TAG, "queryIOTopAllAsync Succeed");
+                //mView.showPieChart(response.getIoTopBeans());
+                mView.hideLoading();
             }
         });
     }
 
+    /**
+     * 按照包名区分，查询最新的数据
+     */
     @Override
     public void queryIOTopByPackage() {
-        mView.showToast("Loading...");
+        mView.showLoading();
         mUseCaseHandler.execute(mByPackageTask, new RawQueryTopTask.RequestValues(SqlScript.SQL_LATEST_BY_PACKAGE),
                 new SimpleUseCaseCallBack<RawQueryTopTask.ResponseValue>() {
                     @Override
                     public void onSuccess(RawQueryTopTask.ResponseValue response) {
-                        Log.d(TAG, "数据集：" + response.getIoTopBeans().size());
-                        mView.showToast("load succeed!");
+                        Log.d(TAG, "queryIOTopByPackage Succeed");
+                        mView.showPieChart(response.getIoTopBeans());
+                        mView.hideLoading();
                     }
                 });
     }
