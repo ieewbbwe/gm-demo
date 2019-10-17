@@ -25,11 +25,15 @@ import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.utils.TimerUtils;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Created by s2s8tb on 2019/9/26.
+ * 图形化界面
+ */
 public class ChartActivity extends BaseActivity implements ChartContract.View, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+    private static final int ANIMATE_DURATION = 800;
     private Date startTime = TimerUtils.removeHHMMSS(new Date());
     private Date endTime = TimerUtils.removeHHMMSS(TimerUtils.getTomorrow());
 
@@ -98,7 +102,7 @@ public class ChartActivity extends BaseActivity implements ChartContract.View, V
         // add a selection listener
         //mChart.setOnChartValueSelectedListener(this);
 
-        mChart.animateY(1400, Easing.EaseInOutQuad);
+        mChart.animateY(ANIMATE_DURATION, Easing.EaseInOutQuad);
         // chart.spin(2000, 0, 360);
 
         Legend l = mChart.getLegend();
@@ -128,7 +132,7 @@ public class ChartActivity extends BaseActivity implements ChartContract.View, V
         mChart.setData(data);
         // undo all highlights
         mChart.highlightValues(null);
-
+        mChart.animateY(ANIMATE_DURATION);
         mChart.invalidate();
     }
 

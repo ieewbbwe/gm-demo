@@ -15,9 +15,9 @@ import java.util.List;
 /**
  * Created by s2s8tb on 2019/10/15.
  * 把包名和PID联合作为唯一标识，找相同包名不同PID下的最后一条数据，在求和 （有漏洞，万一PID被复用给同一个包名就可能漏掉一些数据
- * SELECT PROCESS,SUM(WRITTEN)'SUMWRITTEN'
- * FROM (SELECT PROCESS,WRITTEN FROM (SELECT * FROM IOTOP_BEAN ORDER BY DATE DESC) AS A GROUP BY A.PROCESS,A.PID)
- * group by PROCESS
+ * SELECT SUM(WRITTEN) FROM (SELECT * FROM IOTOP_BEAN
+ * WHERE DATE BETWEEN 1570844130041 AND 1570844130045 GROUP BY PROCESS,PID)
+ * GROUP BY PROCESS
  * 1.按照PID与包名分组，查找应用在时间范围内的最后一条数据
  * 2.按照包名求和
  */
@@ -34,6 +34,7 @@ public class SumWrittenTopTask extends UseCase<SumWrittenTopTask.RequestValues, 
         String pid = IOTopBeanDao.Properties.PID.columnName;
         String date = IOTopBeanDao.Properties.Date.columnName;
         //按照包名和PID分组，查询IOTOP最新的一条数据
+        //SELECT _ID,PID,PROCESS,SUM(WRITTEN) FROM (SELECT * FROM (SELECT * FROM IOTOP_BEAN ORDER BY DATE DESC) GROUP BY PROCESS,PID) GROUP BY PROCESS
 //        String sql = "SELECT " + process + ",SUM(" + written + ")'SUMWRITTEN' FROM (SELECT " + process + "," + written
 //                + " FROM (SELECT * FROM " + tableName + " ORDER BY " + date + " DESC) AS A GROUP BY A." + process + ",A." + pid
 //                + ") AS B GROUP BY B." + process;

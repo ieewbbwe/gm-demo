@@ -8,7 +8,6 @@ import android.os.Environment
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.util.Log
 import android.view.View
@@ -36,6 +35,7 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        title = "IOTOP Test Panel"
         mPresenter = MainPresenter(this)
 
         m_register_bt.setOnClickListener(this)
@@ -70,7 +70,7 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
             R.id.m_register_bt -> mPresenter?.registerService()
             R.id.m_execute_bt -> mPresenter?.executeShellAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
-            R.id.m_insert_bt -> mPresenter?.insertIoTopBean(DataEngine.gerInstance().createIOTopBean())
+            R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
             R.id.m_delete_bt -> showToast("doing")
             R.id.m_update_bt -> showToast("doing")
             R.id.m_query_bt -> mPresenter?.queryAll()

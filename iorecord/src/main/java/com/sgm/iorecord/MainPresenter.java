@@ -69,6 +69,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public void insertIOList(List<IOTopBean> ioBeans) {
+        mView.showLoading();
         mUseCaseHandler.execute(mInsertTask, new InsertTopListTask.RequestValues(ioBeans), new SimpleUseCaseCallBack<InsertTopListTask.ResponseValue>() {
             @Override
             public void onSuccess(InsertTopListTask.ResponseValue response) {
@@ -79,9 +80,11 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public void queryAll() {
+        mView.showLoading();
         mUseCaseHandler.execute(mQueryTask, new QueryTask.RequestValues(), new SimpleUseCaseCallBack<QueryTask.ResponseValue>() {
             @Override
             public void onSuccess(QueryTask.ResponseValue response) {
+                mView.hideLoading();
                 RxBus.get().post(new RXLoadIoTopAllEvent(response.getIoTopBeans()));
             }
         });

@@ -33,6 +33,15 @@ public class DataEngine {
         return result;
     }
 
+    @Nullable
+    public List<IOTopBean> createIOTopList(int size) {
+        List<IOTopBean> ioTopBeans = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            ioTopBeans.add(createIOTopBean());
+        }
+        return ioTopBeans;
+    }
+
     private static class DataEngineHolder {
         static final DataEngine instance = new DataEngine();
     }
@@ -56,14 +65,14 @@ public class DataEngine {
     }
 
     public IOTopBean createIOTopBean() {
-        String[] pros = new String[]{"com.sgm.iorecord", "com.sgm.rwutils", "com.sgm.calendar"};
+        String[] pros = new String[]{"com.sgm.iorecord", "com.sgm.rwutils", "com.sgm.calendar", "com.sgm.media"};
         IOTopBean ioBean = new IOTopBean();
         ioBean.setPID(String.valueOf(new Random().nextInt(1000) + 1));
         ioBean.setREAD(String.valueOf(new Random().nextInt(10000000)));
         ioBean.setREAD_SPEED(String.valueOf(new Random().nextFloat() * 100));
         ioBean.setWRITTEN(String.valueOf(new Random().nextInt(2000)));
         ioBean.setWRITE_SPEED(String.valueOf(new Random().nextFloat() * 10));
-        ioBean.setPROCESS(pros[new Random().nextInt(2)]);
+        ioBean.setPROCESS(pros[new Random().nextInt(pros.length)]);
         ioBean.setDate(new Date());
         return ioBean;
     }
