@@ -2,4 +2,8 @@
     <string name="app_name">iorecord</string>
     <string name="chart_data_present_change">数据/百分比 切换</string>
     <string name="chart_line_target">线性标识</string>
+    <string name="chart_type_pie">饼图</string>
+    <string name="chart_type_bar">柱状图</string>
+    <string name="chart_start_time">开始时间</string>
+    <string name="chart_end_time">结束时间</string>
 </resources>

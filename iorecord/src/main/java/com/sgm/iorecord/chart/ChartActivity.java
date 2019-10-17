@@ -3,27 +3,41 @@ package com.sgm.iorecord.chart;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
+import com.bigkoo.pickerview.builder.TimePickerBuilder;
+import com.bigkoo.pickerview.listener.OnTimeSelectListener;
+import com.bigkoo.pickerview.view.TimePickerView;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.sgm.iorecord.R;
 import com.sgm.iorecord.base.BaseActivity;
 import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.model.IOTopBean;
+import com.sgm.iorecord.utils.TimerUtils;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-//TODO 按照所选时间段插数据
-public class ChartActivity extends BaseActivity implements ChartContract.View {
+public class ChartActivity extends BaseActivity implements ChartContract.View, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
+    private Date startTime = TimerUtils.removeHHMMSS(new Date());
+    private Date endTime = TimerUtils.removeHHMMSS(TimerUtils.getTomorrow());
 
     private ChartPresenter mPresenter;
     private PieChart mChart;
+    private TextView mStartTimeTv;
+    private TextView mEndTimeTv;
+    private SwipeRefreshLayout mChartSrl;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,13 +46,23 @@ public class ChartActivity extends BaseActivity implements ChartContract.View {
         setContentView(R.layout.activity_chart);
         mPresenter = new ChartPresenter(this);
         //mPresenter.queryIOTopAllAsync();
-        mPresenter.queryIOTopByPackage();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         initChartView();
+        mStartTimeTv = findViewById(R.id.m_start_time_tv);
+        mEndTimeTv = findViewById(R.id.m_end_time_bt);
+        mChartSrl = findViewById(R.id.m_chart_srl);
+        mStartTimeTv.setOnClickListener(this);
+        mEndTimeTv.setOnClickListener(this);
+        mChartSrl.setOnRefreshListener(this);
+
+        mStartTimeTv.setText(TimerUtils.formatTime(startTime.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
+        mEndTimeTv.setText(TimerUtils.formatTime(endTime.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
+
+        mPresenter.queryIOTopByPackage(startTime, endTime);
     }
 
     private void initChartView() {
@@ -92,10 +116,9 @@ public class ChartActivity extends BaseActivity implements ChartContract.View {
         mChart.setEntryLabelTextSize(12f);
     }
 
-
     @Override
-    public void showPieChart(List<IOTopBean> ioTopBeans) {
-        PieDataSet dataSet = DataEngine.gerInstance().convertToPieDataFromTopList(ioTopBeans);
+    public void showPieChart(List<PieEntry> entries) {
+        PieDataSet dataSet = DataEngine.gerInstance().convertToPieDataFromTopList(entries);
 
         PieData data = new PieData(dataSet);
         data.setValueFormatter(new PercentFormatter(mChart));
@@ -112,6 +135,12 @@ public class ChartActivity extends BaseActivity implements ChartContract.View {
     @Override
     public void showBarChart(List<IOTopBean> ioTopBeans) {
 
+    }
+
+    @Override
+    public void showTimePicker(OnTimeSelectListener selectListener) {
+        TimePickerView pvTime = new TimePickerBuilder(ChartActivity.this, selectListener).build();
+        pvTime.show();
     }
 
     @Override
@@ -151,5 +180,46 @@ public class ChartActivity extends BaseActivity implements ChartContract.View {
             dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
         }
         mChart.invalidate();
+    }
+
+    @Override
+    public void onClick(final View view) {
+        switch (view.getId()) {
+            case R.id.m_start_time_tv:
+                showTimePicker(new OnTimeSelectListener() {
+                    @Override
+                    public void onTimeSelect(Date date, View v) {
+                        startTime = TimerUtils.removeHHMMSS(date);
+                        ((TextView) view).setText(TimerUtils.formatTime(date.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
+                    }
+                });
+                break;
+            case R.id.m_end_time_bt:
+                showTimePicker(new OnTimeSelectListener() {
+                    @Override
+                    public void onTimeSelect(Date date, View v) {
+                        endTime = TimerUtils.removeHHMMSS(date);
+                        ((TextView) view).setText(TimerUtils.formatTime(date.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
+                    }
+                });
+                break;
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        mPresenter.queryIOTopByPackage(startTime, endTime);
+    }
+
+    @Override
+    public void showLoading() {
+        //super.showLoading();
+        mChartSrl.setRefreshing(true);
+    }
+
+    @Override
+    public void hideLoading() {
+        //super.hideLoading();
+        mChartSrl.setRefreshing(false);
     }
 }

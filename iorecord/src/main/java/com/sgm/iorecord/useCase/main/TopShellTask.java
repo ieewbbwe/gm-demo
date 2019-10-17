@@ -1,6 +1,7 @@
 package com.sgm.iorecord.useCase.main;
 
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.sgm.iorecord.BuildConfig;
@@ -13,7 +14,7 @@ import com.sgm.iorecord.utils.CommandExecution;
  * Shell 命令任务
  */
 
-public class ShellTask extends UseCase<ShellTask.RequestValues, ShellTask.ResponseValue> {
+public class TopShellTask extends UseCase<TopShellTask.RequestValues, TopShellTask.ResponseValue> {
 
     @Override
     protected void executeUseCase(RequestValues requestValues) {
@@ -23,7 +24,12 @@ public class ShellTask extends UseCase<ShellTask.RequestValues, ShellTask.Respon
         } else {
             result = CommandExecution.execCommand(requestValues.getShellSpript(), requestValues.isRoot());
         }
-        getUseCaseCallback().onSuccess(new ResponseValue(result));
+        Log.d("picher","任务执行完成！");
+        if (!TextUtils.isEmpty(result.successMsg)) {
+            getUseCaseCallback().onSuccess(new ResponseValue(result));
+        } else if (!TextUtils.isEmpty(result.errorMsg)) {
+            getUseCaseCallback().onError();
+        }
     }
 
     public static final class RequestValues implements UseCase.RequestValues {

@@ -16,7 +16,7 @@ import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
 import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
 import com.sgm.iorecord.useCase.main.RegisterTask;
-import com.sgm.iorecord.useCase.main.ShellTask;
+import com.sgm.iorecord.useCase.main.TopShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
 
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.List;
 public class MainPresenter extends BasePresenter<MainContract.View>
         implements MainContract.Presenter {
 
-    private final ShellTask mShellTask;
+    private final TopShellTask mShellTask;
     private final UseCaseHandler mUseCaseHandler;
     private final InsertTopListTask mInsertTask;
     private final QueryTask mQueryTask;
@@ -37,7 +37,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     public MainPresenter(MainContract.View view) {
         super(view);
-        mShellTask = new ShellTask();
+        mShellTask = new TopShellTask();
         mUseCaseHandler = UseCaseHandler.getInstance();
         mInsertTask = new InsertTopListTask();
         mQueryTask = new QueryTask();
@@ -75,7 +75,6 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 mView.hideLoading();
             }
         });
-
     }
 
     @Override
@@ -91,9 +90,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShell(final String shell, final boolean isRoot, final IShellCallBack shellCallBack) {
         shellCallBack.onShellStart();
-        mUseCaseHandler.execute(mShellTask, new ShellTask.RequestValues(shell), new UseCase.UseCaseCallback<ShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mShellTask, new TopShellTask.RequestValues(shell), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
             @Override
-            public void onSuccess(ShellTask.ResponseValue response) {
+            public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
                 Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
                         result.errorMsg, result.successMsg, result.result));
@@ -102,6 +101,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
             @Override
             public void onError() {
+                mView.showToast("不支持IOTOP");
                 Log.d(TAG, "executeShell Error!");
             }
         });
@@ -110,9 +110,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoading();
-        mUseCaseHandler.execute(mShellTask, new ShellTask.RequestValues(shell), new SimpleUseCaseCallBack<ShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mShellTask, new TopShellTask.RequestValues(shell), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
             @Override
-            public void onSuccess(ShellTask.ResponseValue response) {
+            public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
                 Log.d(TAG, String.format("errorMsg:%s\nsuccessMsg:%s\nresult:%s\n",
                         result.errorMsg, result.successMsg, result.result));
@@ -122,6 +122,12 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 }
             }
 
+            @Override
+            public void onError() {
+                super.onError();
+                mView.showToast("不支持IOTOP");
+                Log.d(TAG, "executeShell Error!");
+            }
         });
     }
 

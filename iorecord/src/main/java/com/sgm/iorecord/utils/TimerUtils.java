@@ -143,12 +143,12 @@ public class TimerUtils {
      *
      * @return 返回短时间字符串格式yyyy-MM-dd
      */
-    public static String getTomorrow() {
+    public static Date getTomorrow() {
         Calendar c = Calendar.getInstance();
         int day = c.get(Calendar.DATE);
         c.set(Calendar.DATE, day + 1);
-
-        return new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
+        return c.getTime();
+        //return new SimpleDateFormat("yyyy-MM-dd").format(c.getTime());
     }
 
     /**
@@ -556,5 +556,20 @@ public class TimerUtils {
         c.add(modeUnite, time);
         Date y = c.getTime();
         return y.getTime();
+    }
+
+    /**
+     * 忽略时分秒
+     */
+    public static Date removeHHMMSS(Date date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_YYYY_MM_DD);
+        String s = sdf.format(date);
+        Date d = null;
+        try {
+            d = sdf.parse(s);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return d;
     }
 }

@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -82,18 +84,12 @@ public class DataEngine {
     }
 
     /**
-     * 将iotop数据转换为图表识别的数据
+     * 将数据转换为图表识别的数据
      *
-     * @param ioTopBeans
      * @return
      */
-    public PieDataSet convertToPieDataFromTopList(List<IOTopBean> ioTopBeans) {
-        ArrayList<PieEntry> entries = new ArrayList<>();
-        for (IOTopBean top : ioTopBeans) {
-            entries.add(new PieEntry(Float.parseFloat(top.getWRITTEN()), top.getPROCESS()));
-        }
-
-        PieDataSet dataSet = new PieDataSet(entries, "Results Legends");
+    public PieDataSet convertToPieDataFromTopList(List<PieEntry> pieEntries) {
+        PieDataSet dataSet = new PieDataSet(pieEntries, "Results Legends");
         dataSet.setDrawIcons(false);
 
         dataSet.setSliceSpace(3f);
@@ -119,6 +115,28 @@ public class DataEngine {
         dataSet.setColors(colors);
 
         return dataSet;
+    }
+
+    /**
+     * 将从数据库查询到的数据，按照包名求和
+     * 为了不漏掉应用被杀前的数据
+     *
+     * @param ioTopBeans
+     * @return
+     */
+    private Map<String, List<IOTopBean>> filterByPackage(List<IOTopBean> ioTopBeans) {
+        List<IOTopBean> topBeans;
+        Map<String, List<IOTopBean>> topBeanMap = new HashMap<>();
+        for (IOTopBean top : ioTopBeans) {
+            if (topBeanMap.get(top.getPROCESS()) == null) {
+                topBeans = new ArrayList<>();
+                topBeans.add(top);
+                topBeanMap.put(top.getPROCESS(), topBeans);
+            } else {
+                topBeanMap.get(top.getPROCESS()).add(top);
+            }
+        }
+        return topBeanMap;
     }
 
 }
