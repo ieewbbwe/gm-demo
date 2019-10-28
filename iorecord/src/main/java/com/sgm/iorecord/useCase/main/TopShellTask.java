@@ -24,7 +24,6 @@ public class TopShellTask extends UseCase<TopShellTask.RequestValues, TopShellTa
         } else {
             result = CommandExecution.execCommand(requestValues.getShellSpript(), requestValues.isRoot());
         }
-        Log.d("picher","任务执行完成！");
         if (!TextUtils.isEmpty(result.successMsg)) {
             getUseCaseCallback().onSuccess(new ResponseValue(result));
         } else if (!TextUtils.isEmpty(result.errorMsg)) {

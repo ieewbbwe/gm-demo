@@ -1,7 +1,14 @@
 package com.sgm.iorecord;
 
+import android.app.ActivityManager;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Debug;
 import android.util.Log;
 
+import com.sgm.iorecord.alarm.IORecordService;
+import com.sgm.iorecord.alarm.TimeTicketReceiver;
 import com.sgm.iorecord.base.BasePresenter;
 import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.databases.DbController;
@@ -9,9 +16,9 @@ import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
 import com.sgm.iorecord.event.rx.RxBus;
 import com.sgm.iorecord.listener.IShellCallBack;
 import com.sgm.iorecord.model.IOTopBean;
+import com.sgm.iorecord.model.ProcessInfo;
 import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
 import com.sgm.iorecord.useCase.UseCase;
-import com.sgm.iorecord.useCase.UseCaseHandler;
 import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
 import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
@@ -28,8 +35,7 @@ import java.util.List;
 public class MainPresenter extends BasePresenter<MainContract.View>
         implements MainContract.Presenter {
 
-    private final TopShellTask mShellTask;
-    private final UseCaseHandler mUseCaseHandler;
+    private final TopShellTask mTopShellTask;
     private final InsertTopListTask mInsertTask;
     private final QueryTask mQueryTask;
     private final RegisterTask mRegisterTask;
@@ -37,8 +43,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     public MainPresenter(MainContract.View view) {
         super(view);
-        mShellTask = new TopShellTask();
-        mUseCaseHandler = UseCaseHandler.getInstance();
+        mTopShellTask = new TopShellTask();
         mInsertTask = new InsertTopListTask();
         mQueryTask = new QueryTask();
         mRegisterTask = new RegisterTask();
@@ -93,7 +98,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShell(final String shell, final boolean isRoot, final IShellCallBack shellCallBack) {
         shellCallBack.onShellStart();
-        mUseCaseHandler.execute(mShellTask, new TopShellTask.RequestValues(shell), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -113,7 +118,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoading();
-        mUseCaseHandler.execute(mShellTask, new TopShellTask.RequestValues(shell), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -153,4 +158,43 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         });
     }
 
+    @Override
+    public void registerTimeTicketReceiver() {
+        TimeTicketReceiver ticketReceiver = new TimeTicketReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_TIME_TICK);
+        intentFilter.addAction("pichertest");
+        mView.registerMyReceiver(ticketReceiver, intentFilter);
+    }
+
+    @Override
+    public void startRecordService() {
+        Intent intent = new Intent(mView.getContext(), IORecordService.class);
+        mView.startMyService(intent);
+    }
+
+    @Override
+    public void getProcessMemoryInfo(List<ProcessInfo> pids) {
+        if (pids != null && pids.size() > 0) {
+            int[] realPids = new int[pids.size()];
+            String[] processNames = new String[pids.size()];
+            for (int i = 0; i < pids.size(); i++) {
+                realPids[i] = pids.get(i).getPid();
+                processNames[i] = pids.get(i).getProcessName() + "-" + realPids[i];
+            }
+
+            ActivityManager activityManager = (ActivityManager) mView.getContext().getSystemService(Context.ACTIVITY_SERVICE);
+            if (activityManager != null) {
+                Debug.MemoryInfo[] memInfos = activityManager.getProcessMemoryInfo(realPids);
+                if (memInfos != null && memInfos.length == pids.size()) {
+                    for (int i = 0; i < realPids.length; i++) {
+                        int pid = realPids[i];
+                        Debug.MemoryInfo pidMemoryInfo = memInfos[i];
+                    }
+                }
+                //activityManager.getProcessMemoryInfo()
+            }
+        }
+
+    }
 }

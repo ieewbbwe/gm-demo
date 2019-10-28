@@ -15,16 +15,10 @@ public class ChartPresenter extends BasePresenter<ChartContract.View>
         implements ChartContract.Presenter {
 
     private final QueryTask mQueryTask;
-    private final UseCaseHandler mUseCaseHandler;
-    private final RawQueryTopTask mByPackageTask;
-    private final SumWrittenTopTask mSumWrittenTopTask;
 
     public ChartPresenter(ChartContract.View view) {
         super(view);
-        mUseCaseHandler = UseCaseHandler.getInstance();
         mQueryTask = new QueryTask();
-        mByPackageTask = new RawQueryTopTask();
-        mSumWrittenTopTask = new SumWrittenTopTask();
     }
 
     /**
@@ -43,28 +37,4 @@ public class ChartPresenter extends BasePresenter<ChartContract.View>
         });
     }
 
-    /**
-     * 按照包名区分，查询最新的数据
-     *
-     * @param startTime
-     * @param endTime
-     */
-    @Override
-    public void queryIOTopByPackage(Date startTime, Date endTime) {
-        mView.showLoading();
-        if (endTime.getTime() <= startTime.getTime()) {
-            mView.showToast("时间区间错误！");
-            mView.hideLoading();
-            return;
-        }
-        mUseCaseHandler.execute(mSumWrittenTopTask, new SumWrittenTopTask.RequestValues(startTime, endTime),
-                new SimpleUseCaseCallBack<SumWrittenTopTask.ResponseValue>() {
-                    @Override
-                    public void onSuccess(SumWrittenTopTask.ResponseValue response) {
-                        Log.d(TAG, "queryIOTopByPackage Succeed!" + response.getPieEntries().size());
-                        mView.showPieChart(response.getPieEntries());
-                        mView.hideLoading();
-                    }
-                });
-    }
 }

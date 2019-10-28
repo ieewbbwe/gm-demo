@@ -1,150 +1,66 @@
 package com.sgm.iorecord.chart;
 
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
-import com.bigkoo.pickerview.builder.TimePickerBuilder;
-import com.bigkoo.pickerview.listener.OnTimeSelectListener;
-import com.bigkoo.pickerview.view.TimePickerView;
-import com.github.mikephil.charting.animation.Easing;
-import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.formatter.PercentFormatter;
 import com.sgm.iorecord.R;
 import com.sgm.iorecord.base.BaseActivity;
-import com.sgm.iorecord.databases.DataEngine;
+import com.sgm.iorecord.chart.fragment.BarChartFragment;
+import com.sgm.iorecord.base.BaseChartFragment;
+import com.sgm.iorecord.chart.fragment.PieChartFragment;
 import com.sgm.iorecord.model.IOTopBean;
-import com.sgm.iorecord.utils.TimerUtils;
 
-import java.util.Date;
 import java.util.List;
 
 /**
  * Created by s2s8tb on 2019/9/26.
  * 图形化界面
  */
-public class ChartActivity extends BaseActivity implements ChartContract.View, View.OnClickListener, SwipeRefreshLayout.OnRefreshListener {
-    private static final int ANIMATE_DURATION = 800;
-    private Date startTime = TimerUtils.removeHHMMSS(new Date());
-    private Date endTime = TimerUtils.removeHHMMSS(TimerUtils.getTomorrow());
+public class ChartActivity extends BaseActivity implements ChartContract.View, SwipeRefreshLayout.OnRefreshListener, RadioGroup.OnCheckedChangeListener {
+    private static final String TAG = "ChartActivity";
 
     private ChartPresenter mPresenter;
-    private PieChart mChart;
-    private TextView mStartTimeTv;
-    private TextView mEndTimeTv;
     private SwipeRefreshLayout mChartSrl;
+    private RadioGroup mChartRg;
+    private FragmentManager mFragmentManager;
+    private String mCurrentFragmentTag;
+    private RadioButton mPieRb;
+    private RadioButton mBarRb;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("Visual Chart");
         setContentView(R.layout.activity_chart);
-        mPresenter = new ChartPresenter(this);
         //mPresenter.queryIOTopAllAsync();
+        mPresenter = new ChartPresenter(this);
+        mFragmentManager = getSupportFragmentManager();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        initChartView();
-        mStartTimeTv = findViewById(R.id.m_start_time_tv);
-        mEndTimeTv = findViewById(R.id.m_end_time_bt);
         mChartSrl = findViewById(R.id.m_chart_srl);
-        mStartTimeTv.setOnClickListener(this);
-        mEndTimeTv.setOnClickListener(this);
+        mChartRg = findViewById(R.id.m_check_rg);
+        mPieRb = findViewById(R.id.m_pie_check_rb);
+        mBarRb = findViewById(R.id.m_bar_check_rb);
+
         mChartSrl.setOnRefreshListener(this);
-
-        mStartTimeTv.setText(TimerUtils.formatTime(startTime.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
-        mEndTimeTv.setText(TimerUtils.formatTime(endTime.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
-
-        mPresenter.queryIOTopByPackage(startTime, endTime);
-    }
-
-    private void initChartView() {
-        mChart = findViewById(R.id.m_pie_chart);
-        mChart.setUsePercentValues(true);
-        mChart.getDescription().setEnabled(false);
-        mChart.setExtraOffsets(5, 10, 5, 5);
-
-        mChart.setDragDecelerationFrictionCoef(0.95f);
-
-        //chart.setCenterTextTypeface(tfLight);
-        mChart.setCenterText("History Written");
-
-        mChart.setDrawHoleEnabled(true);
-        mChart.setHoleColor(Color.WHITE);
-
-        mChart.setTransparentCircleColor(Color.WHITE);
-        mChart.setTransparentCircleAlpha(110);
-
-        mChart.setHoleRadius(58f);
-        mChart.setTransparentCircleRadius(61f);
-
-        mChart.setDrawCenterText(true);
-
-        mChart.setRotationAngle(0);
-        // enable rotation of the chart by touch
-        mChart.setRotationEnabled(true);
-        mChart.setHighlightPerTapEnabled(true);
-
-        // chart.setUnit(" €");
-        // chart.setDrawUnitsInChart(true);
-
-        // add a selection listener
-        //mChart.setOnChartValueSelectedListener(this);
-
-        mChart.animateY(ANIMATE_DURATION, Easing.EaseInOutQuad);
-        // chart.spin(2000, 0, 360);
-
-        Legend l = mChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-        l.setDrawInside(false);
-        l.setXEntrySpace(7f);
-        l.setYEntrySpace(0f);
-        l.setYOffset(0f);
-
-        // entry label styling
-        mChart.setEntryLabelColor(Color.RED);
-        //chart.setEntryLabelTypeface(tfRegular);
-        mChart.setEntryLabelTextSize(12f);
-    }
-
-    @Override
-    public void showPieChart(List<PieEntry> entries) {
-        PieDataSet dataSet = DataEngine.gerInstance().convertToPieDataFromTopList(entries);
-
-        PieData data = new PieData(dataSet);
-        data.setValueFormatter(new PercentFormatter(mChart));
-        data.setValueTextSize(11f);
-        data.setValueTextColor(Color.RED);
-
-        mChart.setData(data);
-        // undo all highlights
-        mChart.highlightValues(null);
-        mChart.animateY(ANIMATE_DURATION);
-        mChart.invalidate();
+        mChartRg.setOnCheckedChangeListener(this);
+        mPieRb.setChecked(true);
     }
 
     @Override
     public void showBarChart(List<IOTopBean> ioTopBeans) {
 
-    }
-
-    @Override
-    public void showTimePicker(OnTimeSelectListener selectListener) {
-        TimePickerView pvTime = new TimePickerBuilder(ChartActivity.this, selectListener).build();
-        pvTime.show();
     }
 
     @Override
@@ -154,76 +70,69 @@ public class ChartActivity extends BaseActivity implements ChartContract.View, V
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.piePresentLine:
-                showPiePresentLine((PieDataSet) mChart.getData().getDataSet());
-                break;
-            case R.id.pieDataPresentChange:
-                mChart.setUsePercentValues(!mChart.isUsePercentValuesEnabled());
-                mChart.invalidate();
-                break;
-        }
-        return true;
-    }
-
-    /**
-     * 开启/关闭 百分比标记线
-     *
-     * @param dataSet
-     */
-    private void showPiePresentLine(PieDataSet dataSet) {
-        dataSet.setValueLinePart1OffsetPercentage(80.f);
-        dataSet.setValueLinePart1Length(0.2f);
-        dataSet.setValueLinePart2Length(0.4f);
-        //dataSet.setUsingSliceColorAsValueLineColor(true);
-        //dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        if (dataSet.getYValuePosition() == PieDataSet.ValuePosition.OUTSIDE_SLICE) {
-            dataSet.setYValuePosition(PieDataSet.ValuePosition.INSIDE_SLICE);
-        } else {
-            dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
-        }
-        mChart.invalidate();
-    }
-
-    @Override
-    public void onClick(final View view) {
-        switch (view.getId()) {
-            case R.id.m_start_time_tv:
-                showTimePicker(new OnTimeSelectListener() {
-                    @Override
-                    public void onTimeSelect(Date date, View v) {
-                        startTime = TimerUtils.removeHHMMSS(date);
-                        ((TextView) view).setText(TimerUtils.formatTime(date.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
-                    }
-                });
-                break;
-            case R.id.m_end_time_bt:
-                showTimePicker(new OnTimeSelectListener() {
-                    @Override
-                    public void onTimeSelect(Date date, View v) {
-                        endTime = TimerUtils.removeHHMMSS(date);
-                        ((TextView) view).setText(TimerUtils.formatTime(date.getTime(), TimerUtils.FORMAT_YYYY_MM_DD));
-                    }
-                });
-                break;
-        }
-    }
-
-    @Override
     public void onRefresh() {
-        mPresenter.queryIOTopByPackage(startTime, endTime);
+        Fragment fragment = mFragmentManager.findFragmentByTag(mCurrentFragmentTag);
+        if (fragment != null && fragment instanceof BaseChartFragment) {
+            ((BaseChartFragment) fragment).refresh();
+        } else {
+            mChartSrl.setRefreshing(false);
+        }
     }
 
     @Override
     public void showLoading() {
         //super.showLoading();
-        mChartSrl.setRefreshing(true);
+        if (mChartSrl != null && !mChartSrl.isRefreshing()) {
+            mChartSrl.setRefreshing(true);
+        }
     }
 
     @Override
     public void hideLoading() {
         //super.hideLoading();
-        mChartSrl.setRefreshing(false);
+        if (mChartSrl != null && mChartSrl.isRefreshing()) {
+            mChartSrl.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void onCheckedChanged(RadioGroup radioGroup, int checkId) {
+        String tag = null;
+        Fragment fragment = null;
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        if (mCurrentFragmentTag != null) {
+            Fragment currentFragment = mFragmentManager.findFragmentByTag(mCurrentFragmentTag);
+            if (currentFragment != null) {
+                transaction.hide(currentFragment);
+            }
+        }
+        switch (checkId) {
+            case R.id.m_pie_check_rb:
+                tag = PieChartFragment.class.getSimpleName();
+                Fragment pieFragment = mFragmentManager.findFragmentByTag(tag);
+                if (pieFragment != null) {
+                    fragment = pieFragment;
+                } else {
+                    fragment = new PieChartFragment();
+                }
+                break;
+            case R.id.m_bar_check_rb:
+                tag = BarChartFragment.class.getSimpleName();
+                Fragment barFragment = mFragmentManager.findFragmentByTag(tag);
+                if (barFragment != null) {
+                    fragment = barFragment;
+                } else {
+                    fragment = new BarChartFragment();
+                }
+                break;
+        }
+        if (fragment != null && fragment.isAdded()) {
+            transaction.show(fragment);
+        } else if (fragment != null) {
+            transaction.add(R.id.m_chart_fl, fragment, tag);
+        }
+        transaction.commit();
+        mCurrentFragmentTag = tag;
+        Log.d(TAG, "CurrentFragment:" + mCurrentFragmentTag);
     }
 }

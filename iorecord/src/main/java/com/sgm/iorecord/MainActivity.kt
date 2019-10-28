@@ -1,7 +1,11 @@
 package com.sgm.iorecord
 
 import android.Manifest
+import android.app.ActivityManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Environment
@@ -13,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.sgm.iorecord.adapter.IOListAdapter
+import com.sgm.iorecord.alarm.IORecordService
 import com.sgm.iorecord.base.BaseActivity
 import com.sgm.iorecord.chart.ChartActivity
 import com.sgm.iorecord.databases.DataEngine
@@ -26,6 +31,8 @@ import java.io.File
 import java.util.concurrent.Executors
 
 class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
+
+    var TAG: String? = "MainActivity"
 
     var mPresenter: MainPresenter? = null
     var mAdapter: IOListAdapter? = IOListAdapter()
@@ -63,6 +70,11 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
         }, {
             it.printStackTrace()
         })
+
+        mPresenter!!.registerTimeTicketReceiver()
+
+        val recordService = Intent(this, IORecordService::class.java)
+        startService(recordService)
     }
 
     override fun onClick(v: View?) {
@@ -72,13 +84,20 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
             R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
             R.id.m_delete_bt -> showToast("doing")
-            R.id.m_update_bt -> showToast("doing")
+            R.id.m_update_bt -> {
+                //mPresenter!!.registerTimeTicketReceiver()
+                showToast("doing")
+            }
             R.id.m_query_bt -> mPresenter?.queryAll()
         }
     }
 
-    override fun showToast(str: String?) {
-        Toast.makeText(this, str, Toast.LENGTH_SHORT).show()
+    override fun registerMyReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?) {
+        registerReceiver(receiver, filter)
+    }
+
+    override fun startMyService(service: Intent?) {
+        startService(service)
     }
 
     private val REQUEST_CODE_ASK_STORAGE = 1
@@ -112,7 +131,7 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_CODE_ASK_STORAGE -> if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("picher", "授权同意：$grantResults[0]")
+                Log.d(TAG, "授权同意：$grantResults[0]")
                 initAssets()
             } else {
                 Toast.makeText(this@MainActivity, "拒绝授权！", Toast.LENGTH_SHORT).show()
@@ -128,4 +147,5 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
         super.onDestroy()
         RxBus.get().unSubscription(RXLoadIoTopAllEvent::class.java)
     }
+
 }
