@@ -1,6 +1,5 @@
 package com.sgm.iorecord;
 
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,6 +9,7 @@ import com.sgm.iorecord.listener.IShellCallBack;
 import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.model.ProcessInfo;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,14 +39,48 @@ public class MainContract {
 
         void executeShell(String shell, boolean isRoot, IShellCallBack shellCallBack);
 
-        void executeShellAndDBAsync(final String shell, final boolean isRoot);
-
         void registerService();
 
         void registerTimeTicketReceiver();
 
         void startRecordService();
 
-        void getProcessMemoryInfo(List<ProcessInfo> pids);
+        /**
+         * 记录系统IO历史信息
+         *
+         * @param shell  iotop脚本
+         * @param isRoot is devices root
+         */
+        void requireIOAndDBAsync(final String shell, final boolean isRoot);
+
+        /**
+         * 获取系统IO历史数据，按照包名分类求和
+         *
+         * @param startTime 记录得开始时间
+         * @param endTime   记录得结束时间
+         */
+        void queryIOTopByPackage(Date startTime, Date endTime);
+
+        /**
+         * 获取进程内存信息
+         *
+         * @param pids 进程信息
+         */
+        void requireProcessMemoryInfo(List<ProcessInfo> pids);
+
+        /**
+         * 获取进程得线程数
+         *
+         * @param pids 进程信息
+         */
+        void requireThreadNumByProcess(List<ProcessInfo> pids);
+
+        /**
+         * 获取fd句柄数
+         *
+         * @param pids 进程信息
+         */
+        void requireFdNumByProcess(List<ProcessInfo> pids);
+
     }
 }

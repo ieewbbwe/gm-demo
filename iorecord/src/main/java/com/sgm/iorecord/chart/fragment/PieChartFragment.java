@@ -75,7 +75,7 @@ public class PieChartFragment extends BaseChartFragment implements PieChartContr
         mChart.setExtraOffsets(5, 10, 5, 5);
         mChart.setDragDecelerationFrictionCoef(0.95f);
         //chart.setCenterTextTypeface(tfLight);
-        mChart.setCenterText("History Written\n(bytes)");
+        mChart.setCenterText("History Written\n(block)");
         mChart.setDrawHoleEnabled(true);
         mChart.setHoleColor(Color.WHITE);
         mChart.setTransparentCircleColor(Color.WHITE);

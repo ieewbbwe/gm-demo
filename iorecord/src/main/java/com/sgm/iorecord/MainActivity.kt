@@ -1,9 +1,7 @@
 package com.sgm.iorecord
 
 import android.Manifest
-import android.app.ActivityManager
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -80,7 +78,7 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.m_register_bt -> mPresenter?.registerService()
-            R.id.m_execute_bt -> mPresenter?.executeShellAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
+            R.id.m_execute_bt -> mPresenter?.requireIOAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
             R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
             R.id.m_delete_bt -> showToast("doing")

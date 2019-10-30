@@ -99,8 +99,8 @@ done
 
 # get all PIDs
 #pid_all="$(ps -A -o pid | sed '/PID/d')"  # ubuntu
-pid_all=$(ps | awk '{ print $2}' | sed '/PID/d')  # android
-#pid_all=$(ps -e | grep rwutil |awk '{ print $2}' | sed '/PID/d')
+#pid_all=$(ps -ef | grep 'com.sgm' | awk '{ print $2}' | sed '/PID/d')  # android
+pid_all=$(ps -ef | awk '{ print $2}' | sed '/PID/d')  # android
 
 bytes2kb() {
     local var="$(expr $1 '/' 1024)"
@@ -124,6 +124,7 @@ get_new() {
 
 for pid in ${pid_all}; do
     process=""
+    echo -e "<old_pid> $pid </old_pid>"
     if [[ -a /proc/${pid}/cmdline ]]; then
         process="$(cat /proc/${pid}/cmdline)"
     fi
@@ -141,8 +142,10 @@ sleep 1
 
 for pid in ${pid_all}; do
     process=""
+    echo -e "<pid> $pid </pid>"
     if [[ -a /proc/${pid}/cmdline ]]; then
         process="$(cat /proc/${pid}/cmdline)"
+        #echo -e "<pid-process>$pid-$process</pid-process>"
     fi
 
     if [[ -a /proc/${pid}/io && $process != "" ]]; then
@@ -195,11 +198,11 @@ for pid in ${pid_all}; do
             fi
 
 
-            new="$new $pid,$read_new_out,$write_new_out,$read_speed_out,$write_speed_out,$process;"
+            new="$new$pid,$read_new_out,$write_new_out,$read_speed_out,$write_speed_out,$process;"
         fi
     fi
 done
 
-# echo " PID		READ		WRITTEN		READ_SPEED		WRITE_SPEED		PROCESS"
+#echo " PID		READ		WRITTEN		READ_SPEED		WRITE_SPEED		PROCESS"
 echo -e "$new"
 

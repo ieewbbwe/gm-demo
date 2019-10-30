@@ -1,6 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
 
-</android.support.constraint.ConstraintLayout>
+    <TextView
+        android:id="@+id/label_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="起止时间"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/m_start_time_tv"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/m_start_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="@string/chart_start_time"
+        app:layout_constraintLeft_toRightOf="@+id/label_time"
+        app:layout_constraintTop_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/labelTimeLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="9dp"
+        android:text="-"
+        app:layout_constraintBottom_toBottomOf="@+id/m_start_time_tv"
+        app:layout_constraintLeft_toRightOf="@+id/m_start_time_tv"
+        app:layout_constraintTop_toTopOf="@+id/m_start_time_tv" />
+
+    <TextView
+        android:id="@+id/m_end_time_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="9dp"
+        android:padding="4dp"
+        android:text="@string/chart_end_time"
+        app:layout_constraintLeft_toRightOf="@id/labelTimeLine"
+        app:layout_constraintTop_toTopOf="@id/m_start_time_tv" />
+
+</LinearLayout>

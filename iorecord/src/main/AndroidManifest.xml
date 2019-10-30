@@ -21,6 +21,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".alarm.IORecordService" />
+
+        <receiver android:name=".alarm.TestReceiver">
+            <intent-filter>
+                <action android:name="pichertest" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -10,6 +10,7 @@ import android.util.Log;
 import com.sgm.iorecord.alarm.IORecordService;
 import com.sgm.iorecord.alarm.TimeTicketReceiver;
 import com.sgm.iorecord.base.BasePresenter;
+import com.sgm.iorecord.chart.usecase.SumWrittenTopTask;
 import com.sgm.iorecord.databases.DataEngine;
 import com.sgm.iorecord.databases.DbController;
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent;
@@ -26,6 +27,7 @@ import com.sgm.iorecord.useCase.main.RegisterTask;
 import com.sgm.iorecord.useCase.main.TopShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,6 +42,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     private final QueryTask mQueryTask;
     private final RegisterTask mRegisterTask;
     private final InsertTopBeanTask mInsertTopBeanTask;
+    private final SumWrittenTopTask mSumWrittenTopTask;
 
     public MainPresenter(MainContract.View view) {
         super(view);
@@ -48,6 +51,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         mQueryTask = new QueryTask();
         mRegisterTask = new RegisterTask();
         mInsertTopBeanTask = new InsertTopBeanTask();
+        mSumWrittenTopTask = new SumWrittenTopTask();
     }
 
 
@@ -98,7 +102,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShell(final String shell, final boolean isRoot, final IShellCallBack shellCallBack) {
         shellCallBack.onShellStart();
-        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell,isRoot), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -116,9 +120,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void executeShellAndDBAsync(final String shell, final boolean isRoot) {
+    public void requireIOAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoading();
-        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell,isRoot), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -137,6 +141,18 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 Log.d(TAG, "executeShell Error!");
             }
         });
+    }
+
+    @Override
+    public void queryIOTopByPackage(Date startTime, Date endTime) {
+        mUseCaseHandler.execute(mSumWrittenTopTask, new SumWrittenTopTask.RequestValues(startTime, endTime),
+                new SimpleUseCaseCallBack<SumWrittenTopTask.ResponseValue>() {
+                    @Override
+                    public void onSuccess(SumWrittenTopTask.ResponseValue response) {
+                        Log.d(TAG, "queryIOTopByPackage Succeed! PackageSize:" + response.getPieEntries().size());
+                        mView.hideLoading();
+                    }
+                });
     }
 
     /**
@@ -174,7 +190,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void getProcessMemoryInfo(List<ProcessInfo> pids) {
+    public void requireProcessMemoryInfo(List<ProcessInfo> pids) {
         if (pids != null && pids.size() > 0) {
             int[] realPids = new int[pids.size()];
             String[] processNames = new String[pids.size()];
@@ -192,9 +208,19 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                         Debug.MemoryInfo pidMemoryInfo = memInfos[i];
                     }
                 }
-                //activityManager.getProcessMemoryInfo()
+                //activityManager.requireProcessMemoryInfo()
             }
         }
+
+    }
+
+    @Override
+    public void requireThreadNumByProcess(List<ProcessInfo> pids) {
+
+    }
+
+    @Override
+    public void requireFdNumByProcess(List<ProcessInfo> pids) {
 
     }
 }

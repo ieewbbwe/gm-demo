@@ -13,7 +13,6 @@
         android:padding="18dp"
         tools:context=".chart.ChartActivity">
 
-
         <android.support.constraint.Guideline
             android:id="@+id/vertical2percent"
             android:layout_width="wrap_content"
@@ -43,7 +42,6 @@
                 android:id="@+id/m_pie_check_rb"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
                 android:text="@string/chart_type_pie" />
 
             <RadioButton
@@ -55,61 +53,14 @@
 
         </RadioGroup>
 
-        <TextView
-            android:id="@+id/label_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="起止时间"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/m_start_time_tv"
-            app:layout_constraintTop_toBottomOf="@+id/label_style" />
-
-        <TextView
-            android:id="@+id/m_start_time_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:text="@string/chart_start_time"
-            app:layout_constraintLeft_toRightOf="@+id/label_time"
-            app:layout_constraintTop_toBottomOf="@+id/label_style" />
-
-        <TextView
-            android:id="@+id/labelTimeLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="9dp"
-            android:text="-"
-            app:layout_constraintBottom_toBottomOf="@+id/m_start_time_tv"
-            app:layout_constraintLeft_toRightOf="@+id/m_start_time_tv"
-            app:layout_constraintTop_toBottomOf="@+id/label_style" />
-
-        <TextView
-            android:id="@+id/m_end_time_bt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="9dp"
-            android:padding="4dp"
-            android:text="@string/chart_end_time"
-            app:layout_constraintLeft_toRightOf="@id/labelTimeLine"
-            app:layout_constraintTop_toBottomOf="@+id/label_style" />
-
-        <!--<fragment-->
-            <!--android:id="@+id/m_pie_chart_fl"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="0dp"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--app:layout_constraintLeft_toLeftOf="parent"-->
-            <!--app:layout_constraintRight_toRightOf="parent"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/label_time" />-->
-
-        <com.github.mikephil.charting.charts.PieChart
-            android:id="@+id/m_pie_chart"
+        <FrameLayout
+            android:id="@+id/m_chart_fl"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/label_time" />
+            app:layout_constraintTop_toBottomOf="@+id/m_check_rg" />
 
     </android.support.constraint.ConstraintLayout>
 
