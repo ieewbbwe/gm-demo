@@ -8,6 +8,8 @@ import com.sgm.iorecord.base.BaseView;
 import com.sgm.iorecord.listener.IShellCallBack;
 import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.model.ProcessInfo;
+import com.sgm.iorecord.useCase.UseCase;
+import com.sgm.iorecord.useCase.main.GetPIDTask;
 
 import java.util.Date;
 import java.util.List;
@@ -46,6 +48,11 @@ public class MainContract {
         void startRecordService();
 
         /**
+         * 获取应用所有进程信息
+         */
+        void getProcessInfo(UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback);
+
+        /**
          * 记录系统IO历史信息
          *
          * @param shell  iotop脚本
@@ -64,23 +71,23 @@ public class MainContract {
         /**
          * 获取进程内存信息
          *
-         * @param pids 进程信息
+         * @param processInfos 进程信息
          */
-        void requireProcessMemoryInfo(List<ProcessInfo> pids);
+        void requireProcessMemoryInfo(List<ProcessInfo> processInfos);
 
         /**
          * 获取进程得线程数
          *
-         * @param pids 进程信息
+         * @param processInfos 进程信息
          */
-        void requireThreadNumByProcess(List<ProcessInfo> pids);
+        void requireThreadNumByProcess(List<ProcessInfo> processInfos);
 
         /**
          * 获取fd句柄数
          *
-         * @param pids 进程信息
+         * @param processInfos 进程信息
          */
-        void requireFdNumByProcess(List<ProcessInfo> pids);
+        void requireFdNumByProcess(List<ProcessInfo> processInfos);
 
     }
 }

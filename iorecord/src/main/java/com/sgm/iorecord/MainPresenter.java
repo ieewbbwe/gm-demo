@@ -20,6 +20,7 @@ import com.sgm.iorecord.model.IOTopBean;
 import com.sgm.iorecord.model.ProcessInfo;
 import com.sgm.iorecord.useCase.SimpleUseCaseCallBack;
 import com.sgm.iorecord.useCase.UseCase;
+import com.sgm.iorecord.useCase.main.GetPIDTask;
 import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
 import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
@@ -27,6 +28,7 @@ import com.sgm.iorecord.useCase.main.RegisterTask;
 import com.sgm.iorecord.useCase.main.TopShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -43,6 +45,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     private final RegisterTask mRegisterTask;
     private final InsertTopBeanTask mInsertTopBeanTask;
     private final SumWrittenTopTask mSumWrittenTopTask;
+    private final GetPIDTask mGetPIDTask;
 
     public MainPresenter(MainContract.View view) {
         super(view);
@@ -52,6 +55,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         mRegisterTask = new RegisterTask();
         mInsertTopBeanTask = new InsertTopBeanTask();
         mSumWrittenTopTask = new SumWrittenTopTask();
+        mGetPIDTask = new GetPIDTask();
     }
 
 
@@ -102,7 +106,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void executeShell(final String shell, final boolean isRoot, final IShellCallBack shellCallBack) {
         shellCallBack.onShellStart();
-        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell,isRoot), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell, isRoot), new UseCase.UseCaseCallback<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -122,7 +126,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     @Override
     public void requireIOAndDBAsync(final String shell, final boolean isRoot) {
         mView.showLoading();
-        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell,isRoot), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
+        mUseCaseHandler.execute(mTopShellTask, new TopShellTask.RequestValues(shell, isRoot), new SimpleUseCaseCallBack<TopShellTask.ResponseValue>() {
             @Override
             public void onSuccess(TopShellTask.ResponseValue response) {
                 CommandExecution.CommandResult result = response.getResult();
@@ -190,6 +194,11 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
+    public void getProcessInfo(UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback) {
+        mUseCaseHandler.execute(mGetPIDTask, new GetPIDTask.RequestValues(), useCaseCallback);
+    }
+
+    @Override
     public void requireProcessMemoryInfo(List<ProcessInfo> pids) {
         if (pids != null && pids.size() > 0) {
             int[] realPids = new int[pids.size()];
@@ -215,12 +224,13 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void requireThreadNumByProcess(List<ProcessInfo> pids) {
+    public void requireThreadNumByProcess(List<ProcessInfo> processInfos) {
 
     }
 
     @Override
-    public void requireFdNumByProcess(List<ProcessInfo> pids) {
-
+    public void requireFdNumByProcess(List<ProcessInfo> processInfos) {
+        File reader = new File("/proc/5997/stat");
+        reader.list();
     }
 }

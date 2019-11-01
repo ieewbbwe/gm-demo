@@ -22,6 +22,8 @@ import com.sgm.iorecord.databases.DataEngine
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent
 import com.sgm.iorecord.event.rx.RxBus
 import com.sgm.iorecord.model.IOTopBean
+import com.sgm.iorecord.useCase.SimpleUseCaseCallBack
+import com.sgm.iorecord.useCase.main.GetPIDTask
 import com.sgm.iorecord.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
@@ -47,9 +49,10 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
         m_execute_bt.setOnClickListener(this)
         m_insert_bt.setOnClickListener(this)
         m_query_bt.setOnClickListener(this)
-        m_delete_bt.setOnClickListener(this)
-        m_update_bt.setOnClickListener(this)
+        m_fd_bt.setOnClickListener(this)
+        m_pid_thread_bt.setOnClickListener(this)
         m_chart_bt.setOnClickListener(this)
+        m_memory_bt.setOnClickListener(this)
 
         mAdapter!!.setData(mList)
         m_record_rlv.apply {
@@ -81,16 +84,31 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
             R.id.m_execute_bt -> mPresenter?.requireIOAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
             R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
-            R.id.m_delete_bt -> showToast("doing")
-            R.id.m_update_bt -> {
-                //mPresenter!!.registerTimeTicketReceiver()
-                showToast("doing")
-            }
             R.id.m_query_bt -> mPresenter?.queryAll()
+            R.id.m_fd_bt -> {
+                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                    override fun onSuccess(response: GetPIDTask.ResponseValue?) {
+                        mPresenter!!.requireFdNumByProcess(response!!.ioTopBeans)
+                    }
+                })
+            }
+            R.id.m_pid_thread_bt -> {
+                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                    override fun onSuccess(response: GetPIDTask.ResponseValue?) {
+                        mPresenter!!.requireThreadNumByProcess(response!!.ioTopBeans)
+                    }
+                })
+            }
+            R.id.m_memory_bt -> {
+                // mPresenter!!.requireProcessMemoryInfo(null)
+            }
         }
     }
 
     override fun registerMyReceiver(receiver: BroadcastReceiver?, filter: IntentFilter?) {
+        if (receiver!!.abortBroadcast) {
+            unregisterReceiver(receiver)
+        }
         registerReceiver(receiver, filter)
     }
 

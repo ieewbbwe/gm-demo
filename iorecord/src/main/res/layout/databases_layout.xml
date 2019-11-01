@@ -8,23 +8,30 @@
         android:id="@+id/m_insert_bt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Insert" />
-
-    <Button
-        android:id="@+id/m_delete_bt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="delete" />
-
-    <Button
-        android:id="@+id/m_update_bt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="update" />
+        android:text="Insert IOs" />
 
     <Button
         android:id="@+id/m_query_bt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="query" />
+        android:text="query IOS" />
+
+    <Button
+        android:id="@+id/m_fd_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取FD句柄数" />
+
+    <Button
+        android:id="@+id/m_pid_thread_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取进程线程数" />
+
+    <Button
+        android:id="@+id/m_memory_bt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="获取进程内存信息" />
+
 </LinearLayout>

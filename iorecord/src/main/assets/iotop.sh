@@ -100,7 +100,7 @@ done
 # get all PIDs
 #pid_all="$(ps -A -o pid | sed '/PID/d')"  # ubuntu
 #pid_all=$(ps -ef | grep 'com.sgm' | awk '{ print $2}' | sed '/PID/d')  # android
-pid_all=$(ps -ef | awk '{ print $2}' | sed '/PID/d')  # android
+pid_all=$(ps -ef | grep 'com.patac.hmi' | awk '{ print $2}' | sed '/PID/d')  # android
 
 bytes2kb() {
     local var="$(expr $1 '/' 1024)"
