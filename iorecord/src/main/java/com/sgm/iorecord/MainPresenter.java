@@ -4,7 +4,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Debug;
 import android.util.Log;
 
 import com.sgm.iorecord.alarm.IORecordService;
@@ -25,12 +24,15 @@ import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
 import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
 import com.sgm.iorecord.useCase.main.RegisterTask;
+import com.sgm.iorecord.useCase.main.RequireMemoryUseCase;
 import com.sgm.iorecord.useCase.main.TopShellTask;
 import com.sgm.iorecord.utils.CommandExecution;
+import com.sgm.iorecord.utils.Lg;
 
 import java.io.File;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by s2s8tb on 2019/9/26.
@@ -46,6 +48,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     private final InsertTopBeanTask mInsertTopBeanTask;
     private final SumWrittenTopTask mSumWrittenTopTask;
     private final GetPIDTask mGetPIDTask;
+    private final RequireMemoryUseCase mMemoryUseCase;
 
     public MainPresenter(MainContract.View view) {
         super(view);
@@ -56,6 +59,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         mInsertTopBeanTask = new InsertTopBeanTask();
         mSumWrittenTopTask = new SumWrittenTopTask();
         mGetPIDTask = new GetPIDTask();
+        mMemoryUseCase = new RequireMemoryUseCase();
     }
 
 
@@ -200,37 +204,29 @@ public class MainPresenter extends BasePresenter<MainContract.View>
 
     @Override
     public void requireProcessMemoryInfo(List<ProcessInfo> pids) {
-        if (pids != null && pids.size() > 0) {
-            int[] realPids = new int[pids.size()];
-            String[] processNames = new String[pids.size()];
-            for (int i = 0; i < pids.size(); i++) {
-                realPids[i] = pids.get(i).getPid();
-                processNames[i] = pids.get(i).getProcessName() + "-" + realPids[i];
-            }
-
-            ActivityManager activityManager = (ActivityManager) mView.getContext().getSystemService(Context.ACTIVITY_SERVICE);
-            if (activityManager != null) {
-                Debug.MemoryInfo[] memInfos = activityManager.getProcessMemoryInfo(realPids);
-                if (memInfos != null && memInfos.length == pids.size()) {
-                    for (int i = 0; i < realPids.length; i++) {
-                        int pid = realPids[i];
-                        Debug.MemoryInfo pidMemoryInfo = memInfos[i];
+        mUseCaseHandler.execute(mMemoryUseCase, new RequireMemoryUseCase
+                        .RequestValues((ActivityManager) mView.getContext().getSystemService(Context.ACTIVITY_SERVICE), pids),
+                new SimpleUseCaseCallBack<RequireMemoryUseCase.ResponseValue>() {
+                    @Override
+                    public void onSuccess(RequireMemoryUseCase.ResponseValue response) {
+                        Log.d(TAG, "requireProcessMemoryInfo Size:" + response.getMemoryBeans().size());
                     }
-                }
-                //activityManager.requireProcessMemoryInfo()
-            }
-        }
-
+                });
     }
 
     @Override
     public void requireThreadNumByProcess(List<ProcessInfo> processInfos) {
-
+        for (ProcessInfo info : processInfos) {
+            File reader = new File("/proc/" + info.getPid() + "/task");
+            Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d Thread SIZE:%d", info.getPid(), reader.listFiles().length));
+        }
     }
 
     @Override
     public void requireFdNumByProcess(List<ProcessInfo> processInfos) {
-        File reader = new File("/proc/5997/stat");
-        reader.list();
+        for (ProcessInfo info : processInfos) {
+            File reader = new File("/proc/" + info.getPid() + "/fd");
+            Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d FD SIZE:%d", info.getPid(), reader.listFiles().length));
+        }
     }
 }

@@ -100,7 +100,11 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
                 })
             }
             R.id.m_memory_bt -> {
-                // mPresenter!!.requireProcessMemoryInfo(null)
+                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                    override fun onSuccess(response: GetPIDTask.ResponseValue?) {
+                        mPresenter!!.requireProcessMemoryInfo(response!!.ioTopBeans)
+                    }
+                })
             }
         }
     }
