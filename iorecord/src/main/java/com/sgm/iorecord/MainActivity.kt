@@ -1,7 +1,9 @@
 package com.sgm.iorecord
 
 import android.Manifest
+import android.app.ActivityManager
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -22,12 +24,15 @@ import com.sgm.iorecord.databases.DataEngine
 import com.sgm.iorecord.event.RXLoadIoTopAllEvent
 import com.sgm.iorecord.event.rx.RxBus
 import com.sgm.iorecord.model.IOTopBean
+import com.sgm.iorecord.model.ProcessInfo
 import com.sgm.iorecord.useCase.SimpleUseCaseCallBack
 import com.sgm.iorecord.useCase.main.GetPIDTask
+import com.sgm.iorecord.utils.Lg
 import com.sgm.iorecord.utils.Utils
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.databases_layout.*
 import java.io.File
+import java.util.*
 import java.util.concurrent.Executors
 
 class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
@@ -80,7 +85,13 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.m_register_bt -> mPresenter?.registerService()
+            R.id.m_register_bt -> {
+                val infos = requireAllProcess(getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?)
+                for (i in infos) {
+                    Lg.d(TAG, "pid:${i.pid}-name:${i.processName}")
+                }
+                //mPresenter?.registerService()
+            }
             R.id.m_execute_bt -> mPresenter?.requireIOAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
             R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
@@ -168,4 +179,16 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
         RxBus.get().unSubscription(RXLoadIoTopAllEvent::class.java)
     }
 
+    fun requireAllProcess(activityManager: ActivityManager?): List<ProcessInfo> {
+        val infos = ArrayList<ProcessInfo>()
+        if (activityManager != null) {
+            var processInfo: ProcessInfo
+            val runningAppProcesses = activityManager.runningAppProcesses
+            for (info in runningAppProcesses) {
+                processInfo = ProcessInfo(info.pid, info.processName)
+                infos.add(processInfo)
+            }
+        }
+        return infos
+    }
 }
