@@ -23,6 +23,7 @@ import com.sgm.iorecord.useCase.main.GetPIDTask;
 import com.sgm.iorecord.useCase.main.InsertTopBeanTask;
 import com.sgm.iorecord.useCase.main.InsertTopListTask;
 import com.sgm.iorecord.useCase.main.QueryTask;
+import com.sgm.iorecord.useCase.main.ReadIOByStreamTask;
 import com.sgm.iorecord.useCase.main.RegisterTask;
 import com.sgm.iorecord.useCase.main.RequireMemoryUseCase;
 import com.sgm.iorecord.useCase.main.TopShellTask;
@@ -49,6 +50,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     private final SumWrittenTopTask mSumWrittenTopTask;
     private final GetPIDTask mGetPIDTask;
     private final RequireMemoryUseCase mMemoryUseCase;
+    private final ReadIOByStreamTask mReadIOByStreamTask;
 
     public MainPresenter(MainContract.View view) {
         super(view);
@@ -60,6 +62,7 @@ public class MainPresenter extends BasePresenter<MainContract.View>
         mSumWrittenTopTask = new SumWrittenTopTask();
         mGetPIDTask = new GetPIDTask();
         mMemoryUseCase = new RequireMemoryUseCase();
+        mReadIOByStreamTask = new ReadIOByStreamTask();
     }
 
 
@@ -163,6 +166,28 @@ public class MainPresenter extends BasePresenter<MainContract.View>
                 });
     }
 
+    @Override
+    public void requireIOAndDbAsync(List<ProcessInfo> infos) {
+        mView.showLoading();
+        mUseCaseHandler.execute(mReadIOByStreamTask, new ReadIOByStreamTask.RequestValues(infos), new SimpleUseCaseCallBack<ReadIOByStreamTask.ResponseValue>() {
+            @Override
+            public void onSuccess(ReadIOByStreamTask.ResponseValue response) {
+                List<IOTopBean> ioTopBeans = response.getResult();
+                if (ioTopBeans != null) {
+                    Lg.d(TAG, "RequireIO Size:" + response.getResult().size());
+                    insertIOList(ioTopBeans);
+                }
+            }
+
+            @Override
+            public void onError() {
+                super.onError();
+                mView.showToast("Search error");
+                Log.d(TAG, "executeShell Error!");
+            }
+        });
+    }
+
     /**
      * 注册监听应用被杀掉的服务
      */
@@ -198,8 +223,8 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     }
 
     @Override
-    public void getProcessInfo(UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback) {
-        mUseCaseHandler.execute(mGetPIDTask, new GetPIDTask.RequestValues(), useCaseCallback);
+    public void getProcessInfo(ActivityManager activityManager, UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback) {
+        mUseCaseHandler.execute(mGetPIDTask, new GetPIDTask.RequestValues(activityManager), useCaseCallback);
     }
 
     @Override
@@ -218,7 +243,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     public void requireThreadNumByProcess(List<ProcessInfo> processInfos) {
         for (ProcessInfo info : processInfos) {
             File reader = new File("/proc/" + info.getPid() + "/task");
-            Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d Thread SIZE:%d", info.getPid(), reader.listFiles().length));
+            if (reader.listFiles() != null) {
+                Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d Thread SIZE:%d", info.getPid(), reader.listFiles().length));
+            }
         }
     }
 
@@ -226,7 +253,9 @@ public class MainPresenter extends BasePresenter<MainContract.View>
     public void requireFdNumByProcess(List<ProcessInfo> processInfos) {
         for (ProcessInfo info : processInfos) {
             File reader = new File("/proc/" + info.getPid() + "/fd");
-            Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d FD SIZE:%d", info.getPid(), reader.listFiles().length));
+            if (reader.listFiles() != null) {
+                Lg.d(TAG, String.format(Locale.getDefault(), "PID:%d FD SIZE:%d", info.getPid(), reader.listFiles().length));
+            }
         }
     }
 }

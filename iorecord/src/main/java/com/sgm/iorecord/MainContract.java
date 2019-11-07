@@ -1,5 +1,6 @@
 package com.sgm.iorecord;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -50,7 +51,7 @@ public class MainContract {
         /**
          * 获取应用所有进程信息
          */
-        void getProcessInfo(UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback);
+        void getProcessInfo(ActivityManager activityManager, UseCase.UseCaseCallback<GetPIDTask.ResponseValue> useCaseCallback);
 
         /**
          * 记录系统IO历史信息
@@ -58,6 +59,7 @@ public class MainContract {
          * @param shell  iotop脚本
          * @param isRoot is devices root
          */
+        @Deprecated//can't get all pids by shell script "ps"
         void requireIOAndDBAsync(final String shell, final boolean isRoot);
 
         /**
@@ -67,6 +69,11 @@ public class MainContract {
          * @param endTime   记录得结束时间
          */
         void queryIOTopByPackage(Date startTime, Date endTime);
+
+        /**
+         * Require by file stream
+         */
+        void requireIOAndDbAsync(List<ProcessInfo> infos);
 
         /**
          * 获取进程内存信息

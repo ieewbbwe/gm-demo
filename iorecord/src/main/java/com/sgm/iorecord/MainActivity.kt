@@ -42,11 +42,14 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
     var mPresenter: MainPresenter? = null
     var mAdapter: IOListAdapter? = IOListAdapter()
     var mList: MutableList<IOTopBean>? = mutableListOf()
+    var mActivityManager: ActivityManager? = null
+
     private val BACK_UP_FILE = (Environment.getExternalStorageDirectory().path + File.separator + "iorecord")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
         title = "IOTOP Test Panel"
         mPresenter = MainPresenter(this)
 
@@ -85,33 +88,34 @@ class MainActivity : BaseActivity(), MainContract.View, View.OnClickListener {
 
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.m_register_bt -> {
-                val infos = requireAllProcess(getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?)
-                for (i in infos) {
-                    Lg.d(TAG, "pid:${i.pid}-name:${i.processName}")
-                }
-                //mPresenter?.registerService()
+            R.id.m_register_bt -> mPresenter?.registerService()
+            R.id.m_execute_bt -> {
+                //mPresenter?.requireIOAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
+                mPresenter!!.getProcessInfo(mActivityManager, object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                    override fun onSuccess(response: GetPIDTask.ResponseValue?) {
+                        mPresenter!!.requireIOAndDbAsync(response!!.ioTopBeans)
+                    }
+                })
             }
-            R.id.m_execute_bt -> mPresenter?.requireIOAndDBAsync("sh $BACK_UP_FILE/iotop.sh", false)
             R.id.m_chart_bt -> startActivity(Intent(this@MainActivity, ChartActivity::class.java))
             R.id.m_insert_bt -> mPresenter?.insertIOList(DataEngine.gerInstance().createIOTopList(5))
             R.id.m_query_bt -> mPresenter?.queryAll()
             R.id.m_fd_bt -> {
-                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                mPresenter!!.getProcessInfo(mActivityManager, object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
                     override fun onSuccess(response: GetPIDTask.ResponseValue?) {
                         mPresenter!!.requireFdNumByProcess(response!!.ioTopBeans)
                     }
                 })
             }
             R.id.m_pid_thread_bt -> {
-                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                mPresenter!!.getProcessInfo(mActivityManager, object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
                     override fun onSuccess(response: GetPIDTask.ResponseValue?) {
                         mPresenter!!.requireThreadNumByProcess(response!!.ioTopBeans)
                     }
                 })
             }
             R.id.m_memory_bt -> {
-                mPresenter!!.getProcessInfo(object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
+                mPresenter!!.getProcessInfo(mActivityManager, object : SimpleUseCaseCallBack<GetPIDTask.ResponseValue>() {
                     override fun onSuccess(response: GetPIDTask.ResponseValue?) {
                         mPresenter!!.requireProcessMemoryInfo(response!!.ioTopBeans)
                     }

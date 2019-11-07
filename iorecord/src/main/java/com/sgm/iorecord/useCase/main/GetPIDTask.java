@@ -26,7 +26,7 @@ public class GetPIDTask extends UseCase<GetPIDTask.RequestValues, GetPIDTask.Res
 
     @Override
     protected void executeUseCase(RequestValues requestValues) {
-        List<ProcessInfo> processInfos = requireAllPid();
+        List<ProcessInfo> processInfos = requireAllProcess(requestValues.activityManager);
 //        ActivityManager activityManager = requestValues.getActivityManager();
 //        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
 //            processInfos = requireAllProcess(activityManager);
@@ -94,21 +94,22 @@ public class GetPIDTask extends UseCase<GetPIDTask.RequestValues, GetPIDTask.Res
             for (ActivityManager.RunningAppProcessInfo info : runningAppProcesses) {
                 processInfo = new ProcessInfo(info.pid, info.processName);
                 infos.add(processInfo);
+                Lg.d(TAG, "PID:" + info.pid + "ProcessName:" + info.processName);
             }
         }
         return infos;
     }
 
     public static final class RequestValues implements UseCase.RequestValues {
-//        private ActivityManager activityManager;
-//
-//        public RequestValues(ActivityManager activityManager) {
-//            this.activityManager = activityManager;
-//        }
-//
-//        public ActivityManager getActivityManager() {
-//            return activityManager;
-//        }
+        private ActivityManager activityManager;
+
+        public RequestValues(ActivityManager activityManager) {
+            this.activityManager = activityManager;
+        }
+
+        public ActivityManager getActivityManager() {
+            return activityManager;
+        }
     }
 
     public static final class ResponseValue implements UseCase.ResponseValue {
